@@ -1,7 +1,9 @@
 #lang scheme/base
 
 (require (planet schematics/schemeunit:3)
-         "imrp-test.ss")
+         "imrp-test.ss"
+         "point-test.ss")
 
 (define/provide-test-suite all-tests
-  imrp-tests)
+  imrp-tests
+  point-tests)

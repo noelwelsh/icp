@@ -36,13 +36,12 @@
   (match-define (vector x y) p)
   (define r (sqrt (+ (* x x) (* y y))))
   (define a
-    (cond
-     [(and (zero? y) (< x 0))
-      pi]
-     [(and (zero? y) (> x 0))
-      0]
-     [else
-      (asin (/ r y))]))
+    (if (zero? x)
+        (cond
+         [(zero? y) 0]
+         [(< y 0) (* 3/2 pi)]
+         [(> y 0) (* 1/2 pi)])
+        (atan (/ y x))))
 
   (make-point r a))
 
