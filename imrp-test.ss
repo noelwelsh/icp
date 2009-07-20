@@ -45,4 +45,11 @@
    (define p2 (make-point 4 1))
    (check-equal? (closest-point p p1 p2)
                  (make-point 3 1/3)))
+
+  (test-case
+   "matching-point"
+   (define p (make-point 3 0))
+   (define pts (vector (make-point 3 3) (make-point 4 1) (make-point 2 -1) (make-point 3 -3)))
+   (check-equal? (matching-point p pts 1)
+                 (make-point 3 1/3)))
   )
