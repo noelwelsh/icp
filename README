@@ -1,0 +1,3 @@
+Implementation of an Iterative Closest Point (ICP) algorithm.
+
+In particular, we implement the Iterative Dual Correspondence algorithm of Lu & Milios, "Robot Pose Estimation in Unknown Environments by Matching 2D Range Scans"
