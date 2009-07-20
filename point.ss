@@ -1,6 +1,7 @@
 #lang scheme/base
 
-(require (planet schematics/numeric:1/vector))
+(require scheme/math
+         scheme/match)
 
 ;; type point : (vector number number)
 ;;
@@ -17,8 +18,41 @@
   (vector-ref p 1))
 
 
+(define (point-x p)
+  (vector-ref p 0))
 
+(define (point-y p)
+  (vector-ref p 1))
+
+
+(define (polar->cartesian p)
+  (match-define (vector r a) p)
+  (define x (* r (cos a)))
+  (define y (* r (sin a)))
+
+  (make-point x y))
+
+(define (cartesian->polar p)
+  (match-define (vector x y) p)
+  (define r (sqrt (+ (* x x) (* y y))))
+  (define a
+    (cond
+     [(and (zero? y) (< x 0))
+      pi]
+     [(and (zero? y) (> x 0))
+      0]
+     [else
+      (asin (/ r y))]))
+
+  (make-point r a))
 
 (provide make-point
+         
          point-r
-         point-a)
+         point-a
+
+         point-x
+         point-y
+
+         polar->cartesian
+         cartesian->polar)

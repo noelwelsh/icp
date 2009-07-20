@@ -1,6 +1,8 @@
 #lang scheme/base
 
-(require (planet schematics/schemeunit:3/test)
+(require scheme/math
+         (planet schematics/schemeunit:3/test)
+         (planet schematics/numeric:1/vector)
          "imrp.ss"
          "point.ss")
 
@@ -59,4 +61,30 @@
    (define pts2 (vector (make-point 2 3) (make-point 4 2) (make-point 3 1)))
    (check-equal? (matching-points pts1 pts2 1)
                  pts2))
+
+  (test-case
+   "optimal-transformation finds correct rotation"
+   ;; Points on a square (or, a circle!)
+   (define scan-pts (vector (make-point 3 0) (make-point 3 (/ pi 2))
+                            (make-point 3 pi) (make-point 3 (* pi 3/2))))
+   ;; Same points rotated by a constant amount
+   (define matching-pts (vector (make-point 3 .2) (make-point 3 (+ (/ pi 2) .2))
+                            (make-point 3 (+ pi .2)) (make-point 3 (+ (* pi 3/2) .2))))
+   (define-values (tx ty a)
+     (optimal-transformation scan-pts matching-pts))
+   (check-equal? a 0.2))
+
+  (test-case
+   "optimal-transformation finds correct translation"
+   ;; Points on a square (or, a circle!)
+   (define scan-pts (vector (make-point 3 0) (make-point 3 (/ pi 2))
+                            (make-point 3 pi) (make-point 3 (* pi 3/2))))
+   ;; Same points translated by a constant amount
+   (define matching-pts (vector-map cartesian->polar
+                                    (vector (make-point 3.1 .1) (make-point .1 3.1)
+                                            (make-point -2.9 .1) (make-point .1 -2.9))))
+   (define-values (tx ty a)
+     (optimal-transformation scan-pts matching-pts))
+   (check-equal? tx 0.1)
+   (check-equal? ty 0.1))
   )

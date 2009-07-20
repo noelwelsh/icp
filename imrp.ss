@@ -2,6 +2,7 @@
 
 (require scheme/match
          (planet schematics/numeric:1/vector)
+         (planet williams/science:3/statistics)
          "point.ss")
 
 ;; (Vectorof Point) (Vectorof Point) Number -> (Vectorof Point)
@@ -59,7 +60,7 @@
   (match-define (vector r2 a2) p2)
 
   (cond
-   [(and (< r1 r) (< r2 r))
+   [(and (<= r1 r) (<= r2 r))
     (if (> r1 r2)
         p1
         p2)]
@@ -89,9 +90,38 @@
           (- (* r1 a1) (* r2 a2)))))
   (make-point r a))
 
+
+;; (Vectorof Point) (Vectorof Point) -> (values Number Number Number)
+(define (optimal-transformation scan-pts matching-pts)
+  (define s-pts (vector-map polar->cartesian scan-pts))
+  (define m-pts (vector-map polar->cartesian matching-pts))
+
+  (define s-xs (vector-map point-x s-pts))
+  (define m-xs (vector-map point-x m-pts))
+  (define s-ys (vector-map point-y s-pts))
+  (define m-ys (vector-map point-y m-pts))
+  
+  (define s-x-mean (mean s-xs))
+  (define m-x-mean (mean m-xs))
+  (define s-y-mean (mean s-ys))
+  (define m-y-mean (mean m-ys))
+
+  (define cov-xx (covariance s-xs m-xs s-x-mean m-x-mean))
+  (define cov-yy (covariance s-ys m-ys s-y-mean m-y-mean))
+  (define cov-xy (covariance s-xs m-ys s-x-mean m-y-mean))
+  (define cov-yx (covariance s-ys m-xs s-y-mean m-x-mean))
+
+  (define angle (atan (/ (- cov-xy cov-yx) (+ cov-xx cov-yy))))
+  (define t-x (- m-x-mean (* s-x-mean (cos angle)) (* s-y-mean (sin angle))))
+  (define t-y (- m-y-mean (* s-x-mean (sin angle)) (* s-y-mean (cos angle))))
+
+  (values t-x t-y angle))
+
 (provide
  matching-points
  matching-point
  closest-point
  interpolate-point-to-range
- interpolate-point-to-angle)
+ interpolate-point-to-angle
+
+ optimal-transformation)
