@@ -1,7 +1,14 @@
 #lang scheme/base
 
 (require scheme/match
+         (planet schematics/numeric:1/vector)
          "point.ss")
+
+;; (Vectorof Point) (Vectorof Point) Number -> (Vectorof Point)
+(define (matching-points scan-pts model-pts rotation)
+  (for/vector ([i (vector-length scan-pts)]
+               [pt (in-vector scan-pts)])
+              (matching-point pt model-pts rotation)))
 
 ;; Point (Vectorof Point) Number -> Point
 ;;
@@ -83,6 +90,7 @@
   (make-point r a))
 
 (provide
+ matching-points
  matching-point
  closest-point
  interpolate-point-to-range

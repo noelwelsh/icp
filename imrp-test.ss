@@ -52,4 +52,11 @@
    (define pts (vector (make-point 3 3) (make-point 4 1) (make-point 2 -1) (make-point 3 -3)))
    (check-equal? (matching-point p pts 1)
                  (make-point 3 1/3)))
+
+  (test-case
+   "matching-points returns matchs in correct order"
+   (define pts1 (vector (make-point 2 3) (make-point 4 2) (make-point 3 1)))
+   (define pts2 (vector (make-point 2 3) (make-point 4 2) (make-point 3 1)))
+   (check-equal? (matching-points pts1 pts2 1)
+                 pts2))
   )
