@@ -85,6 +85,6 @@
                                             (make-point -2.9 .1) (make-point .1 -2.9))))
    (define-values (tx ty a)
      (optimal-transformation scan-pts matching-pts))
-   (check-equal? tx 0.1)
-   (check-equal? ty 0.1))
+   (check-= tx 0.1 0.00001)
+   (check-= ty 0.1 0.00001))
   )

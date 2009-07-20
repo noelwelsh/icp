@@ -35,13 +35,9 @@
 (define (cartesian->polar p)
   (match-define (vector x y) p)
   (define r (sqrt (+ (* x x) (* y y))))
-  (define a
-    (if (zero? x)
-        (cond
-         [(zero? y) 0]
-         [(< y 0) (* 3/2 pi)]
-         [(> y 0) (* 1/2 pi)])
-        (atan (/ y x))))
+  (define a (if (and (zero? y) (zero? x))
+                0
+                (atan y x)))
 
   (make-point r a))
 
