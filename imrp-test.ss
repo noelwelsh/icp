@@ -72,7 +72,7 @@
                             (make-point 3 (+ pi .2)) (make-point 3 (+ (* pi 3/2) .2))))
    (define-values (tx ty a)
      (optimal-transformation scan-pts matching-pts))
-   (check-equal? a 0.2))
+   (check-= a 0.2 0.00001))
 
   (test-case
    "optimal-transformation finds correct translation"

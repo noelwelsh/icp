@@ -1,7 +1,9 @@
 #lang scheme/base
 
 (require (planet schematics/numeric:1/vector)
-         "point.ss")
+         (planet williams/science:3/statistics)
+         "point.ss"
+         "util.ss")
 
 ;; The "search/least-squares matching algorithm"
 
@@ -61,6 +63,36 @@
 (define (filter-points ref-pts new-pts angle)
   (filter-opaque (filter-bounded-obstacle ref-pts) new-pts angle))
 
+
+;; (Vectorof Cartesian) Number -> 
+(define (fit-tangents pts neighbourhood)
+  (define n-pts (vector-length pts))
+
+  (when (> neighbourhood n-pts)
+    (raise-mismatch-error
+     'fit-tangents
+     (format "Given ~a points, which is less than the neighbourhood size of " n-pts)
+     neighbourhood))
+
+  )
+
+;; (Vectorof Cartesian) -> Polar
+(define (fit-tangent pts)
+  (define xs (vector-map point-x pts))
+  (define ys (vector-map point-y pts))
+
+  (define x-mean (mean xs))
+  (define y-mean (mean ys))
+  
+  (define Sx (sse xs))
+  (define Sy (sse ys))
+  (define Sxy (sse xs ys))
+
+  (define angle (/ (atan (/ (* -2 Sxy) (- Sx Sy))) 2))
+  (define length (+ (* x-mean (cos angle)) (* y-mean (sin angle))))
+  
+  (make-point length angle))
+  
 (provide
  project-points
  filter-points

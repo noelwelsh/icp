@@ -3,7 +3,8 @@
 (require scheme/match
          (planet schematics/numeric:1/vector)
          (planet williams/science:3/statistics)
-         "point.ss")
+         "point.ss"
+         "util.ss")
 
 ;; (Vectorof Point) (Vectorof Point) Number -> (Vectorof Point)
 (define (matching-points scan-pts model-pts rotation)
@@ -106,12 +107,12 @@
   (define s-y-mean (mean s-ys))
   (define m-y-mean (mean m-ys))
 
-  (define cov-xx (covariance s-xs m-xs s-x-mean m-x-mean))
-  (define cov-yy (covariance s-ys m-ys s-y-mean m-y-mean))
-  (define cov-xy (covariance s-xs m-ys s-x-mean m-y-mean))
-  (define cov-yx (covariance s-ys m-xs s-y-mean m-x-mean))
+  (define Sxx (sse s-xs m-xs))
+  (define Syy (sse s-ys m-ys))
+  (define Sxy (sse s-xs m-ys))
+  (define Syx (sse s-ys m-xs))
 
-  (define angle (atan (/ (- cov-xy cov-yx) (+ cov-xx cov-yy))))
+  (define angle (atan (/ (- Sxy Syx) (+ Sxx Syy))))
   (define t-x (- m-x-mean (* s-x-mean (cos angle)) (* s-y-mean (sin angle))))
   (define t-y (- m-y-mean (* s-x-mean (sin angle)) (* s-y-mean (cos angle))))
 

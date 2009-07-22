@@ -3,9 +3,11 @@
 (require (planet schematics/schemeunit:3)
          "imrp-test.ss"
          "point-test.ss"
-         "slsma-test.ss")
+         "slsma-test.ss"
+         "util-test.ss")
 
 (define/provide-test-suite all-tests
   imrp-tests
   point-tests
-  slsma-tests)
+  slsma-tests
+  util-tests)
