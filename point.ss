@@ -1,7 +1,8 @@
 #lang scheme/base
 
 (require scheme/math
-         scheme/match)
+         scheme/match
+         (planet schematics/numeric:1/vector))
 
 ;; type point : (vector number number)
 ;;
@@ -41,6 +42,9 @@
 
   (make-point r a))
 
+(define point+ vector+)
+(define point- vector-)
+
 (provide make-point
          
          point-r
@@ -50,4 +54,7 @@
          point-y
 
          polar->cartesian
-         cartesian->polar)
+         cartesian->polar
+
+         point+
+         point-)
