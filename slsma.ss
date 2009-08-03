@@ -1,6 +1,7 @@
 #lang scheme/base
 
-(require (planet schematics/numeric:1/vector)
+(require scheme/match
+         (planet schematics/numeric:1/vector)
          (planet williams/science:3/statistics)
          "point.ss"
          "util.ss")
@@ -14,8 +15,8 @@
   (for/vector ([i (vector-length pts)]
                [pt (in-vector pts)])
               (cartesian->polar
-               (point- (point+ (polar->cartesian pt) ref-pose)
-                       new-pose))))
+               (cartesian- (cartesian+ (polar->cartesian pt) ref-pose)
+                           new-pose))))
 
 ;; (Vectorof Polar) -> (Vectorof Polar)
 (define (filter-bounded-obstacle pts)
@@ -27,7 +28,7 @@
        ([p1 (in-vector pts)]
         [p2 (in-vector pts 1)]
         [i  (in-naturals)])
-     (if (> (point-a p1) (point-a p2))
+     (if (> (polar-a p1) (polar-a p2))
          (begin (vector-set! mask i #f)
                 (vector-set! mask (add1 i) #f)
                 mask)
@@ -42,8 +43,8 @@
   (define n-ref-pts (vector-length ref-pts))
   (define (obscured? pt pts)
     (for/or ([p1 (in-vector pts)])
-            (if (and (< (abs (- (point-a pt) (point-a p1))) angle)
-                     (< (point-r p1) (point-r pt)))
+            (if (and (< (abs (- (polar-a pt) (polar-a p1))) angle)
+                     (< (polar-r p1) (polar-r pt)))
                 #t
                 #f)))
   (vector-select
@@ -64,34 +65,46 @@
   (filter-opaque (filter-bounded-obstacle ref-pts) new-pts angle))
 
 
-;; (Vectorof Cartesian) Number -> 
-(define (fit-tangents pts neighbourhood)
-  (define n-pts (vector-length pts))
+;; Polar Polar (Vectorof Polar) (Vectorof Polar) Number Number Number
+;;   -> (values (U Polar #f) (U Polar #f)
+;;
+;; Finds the closest matching point and normal, or #f if no
+;; points matches
+(define (matching-point pt normal pts normals rotation alpha Hd)
+  (match-define (struct polar (r a)) pt)
+  (define (interpolate a b percentage)
+    (+ (* (- a b) percentage) b))
+  (define angle (+ a rotation))
 
-  (when (> neighbourhood n-pts)
-    (raise-mismatch-error
-     'fit-tangents
-     (format "Given ~a points, which is less than the neighbourhood size of " n-pts)
-     neighbourhood))
+  (for/fold ([found-pt #f] [found-normal #f])
+      ([p1 (in-vector pts)]
+       [n1 (in-vector normals)]
+       [p2 (in-vector pts 1)]
+       [n2 (in-vector normals 1)])
+    (match-define (struct polar (r1 a1)) p1)
+    (match-define (struct polar (r2 a2)) p2)
 
-  )
+    (if (or
+         (and (< a1 angle) (< a2 angle))
+         (and (> a1 angle) (> a2 angle)))
+        ;; Current points don't straddle the angle
+        (values found-pt found-normal)
+        ;; Interpolate a point and normal to match pt's angle
+        (let* ([percentage (/ (- angle a1) (- a2 a1))]
+               [r* (interpolate r2 r1 percentage)]
+               [n*-r (interpolate (polar-r n2) (polar-r n1) percentage)]
+               [n*-a (interpolate (polar-a n2) (polar-a n1) percentage)]
+               [p* (make-polar r* angle)]
+               [n* (make-polar r a)]
+               ;; The angle between the rotated normal and the interpolated normal
+               [divergence (polar-dot (polar-rotate normal rotation) n*)]
+               [distance (polar-dot (polar+ (polar-rotate normal rotation) n*)
+                                    (polar- p* (polar-rotate pt rotation)))])
+          (if (or (<= (abs distance) Hd)
+                  (<= (cos alpha) divergence))
+              (values found-pt found-normal)
+              (values p* n*))))))
 
-;; (Vectorof Cartesian) -> Polar
-(define (fit-tangent pts)
-  (define xs (vector-map point-x pts))
-  (define ys (vector-map point-y pts))
-
-  (define x-mean (mean xs))
-  (define y-mean (mean ys))
-  
-  (define Sx (sse xs))
-  (define Sy (sse ys))
-  (define Sxy (sse xs ys))
-
-  (define angle (/ (atan (/ (* -2 Sxy) (- Sx Sy))) 2))
-  (define length (+ (* x-mean (cos angle)) (* y-mean (sin angle))))
-  
-  (make-point length angle))
   
 (provide
  project-points
