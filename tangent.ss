@@ -2,7 +2,8 @@
 
 ;;; Fit tangent lines to sets of points
 
-(require (planet schematics/numeric:1/vector)
+(require scheme/math
+         (planet schematics/numeric:1/vector)
          (planet williams/science:3/statistics)
          "point.ss"
          "util.ss")
@@ -46,11 +47,13 @@
   (define Sy (sse ys))
   (define Sxy (sse xs ys))
 
-  (define angle (/ (atan (/ (* -2 Sxy) (- Sx Sy))) 2))
+  (define angle (/ (atan (* -2 Sxy) (- Sy Sx)) 2))
   (define length (+ (* x-mean (cos angle)) (* y-mean (sin angle))))
   (define error (/ (+ Sx Sy (- (sqrt (+ (* 4 Sxy) (square (- Sx Sy)))))) 2))
   ;;(printf "~a ~a ~a ~a ~a\n" x-mean y-mean Sx Sy Sxy)
-  (make-polar length angle))
+  (if (< length 0)
+      (make-polar (- length) (+ pi angle))
+      (make-polar length angle)))
 
 
 
