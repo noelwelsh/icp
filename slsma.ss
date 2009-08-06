@@ -2,6 +2,8 @@
 
 (require scheme/match
          (planet schematics/numeric:1/vector)
+         (planet schematics/mzgsl:1/matrix)
+         (planet schematics/mzgsl:1/gslvector)
          (planet williams/science:3/statistics)
          "point.ss"
          "util.ss")
@@ -105,7 +107,33 @@
               (values found-pt found-normal)
               (values p* n*))))))
 
-  
+;; optimise-translation
+;;
+;; Compute the least squares optimal translation given
+;; points and their matches
+(define (optimise-translation points normals matches matching-normals rotation)
+  (define n (vector-length points))
+  (define x (make-matrix n 2))
+  (define y (make-vector n))  
+  ;; For each point,
+  (for ([p  (in-vector points)]
+        [n  (in-vector normals)]
+        [p* (in-vector matches)]
+        [n* (in-vector matching-normals)])
+  ;;  Calculate distance
+  ;;   (polar-dot (polar+ (polar-rotate normal rotation) n*)
+  ;;              (polar- p* (polar-rotate pt rotation)))
+  ;;  Calculate
+  ;;    (polar+ (polar-rotate normal rotation) n*)
+  ;;  and split into x and y coordinates
+  ;;
+  ;;  Construct least squares equations
+  ;;    Cx Cy = D
+  ;;  Solve
+       )
+  )
+
+
 (provide
  project-points
  filter-points
