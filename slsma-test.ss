@@ -1,8 +1,11 @@
 #lang scheme/base
 
-(require (planet schematics/schemeunit:3/test)
+(require scheme/math
+         (planet schematics/schemeunit:3/test)
          "slsma.ss"
          "point.ss")
+
+(define e 0.00001)
 
 (define/provide-test-suite slsma-tests
   (test-case
@@ -29,5 +32,35 @@
                   1)
                  (vector (make-polar 10 0) (make-polar 5 2))))
 
+  (test-case
+   "matching-point finds exact match"
+   (define-values (pt normal)
+     (matching-point (make-polar 4 0)
+                     (make-polar 4 0)
+                     (list->vector
+                      (map make-polar (list 4 4 4 4 4 4) (list 6 3 0 3 6 9)))
+                     (list->vector
+                      (map make-polar (list 4 4 4 4 4 4) (list 6 3 0 3 6 9)))
+                     0
+                     10
+                     10))
+    (check-equal? pt (make-polar 4 0))
+    (check-equal? normal (make-polar 4 0)))
 
+  (test-case
+   "optimise-translation finds optimal"
+   ;; A square. The normals are the same as the points
+   (define pts (vector (make-polar 4 0) (make-polar 4 (/ pi 2))
+                      (make-polar 4 pi) (make-polar 4 (* pi 3/2))))
+   ;; Square translated and rotated
+   (define t-pts
+     (list->vector
+      (map (lambda (pt)
+             (cartesian->polar
+              (cartesian+ (polar->cartesian (polar-rotate pt (/ pi 4)))
+                          (make-cartesian .2 .2))))
+           (vector->list pts))))
+   (define t (optimise-translation pts pts t-pts t-pts (/ pi 4)))
+   (check-= (vector-ref t 0) .2 e)
+   (check-= (vector-ref t 1) .2 e))
   )

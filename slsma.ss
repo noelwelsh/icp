@@ -4,6 +4,7 @@
          (planet schematics/numeric:1/vector)
          (planet schematics/mzgsl:1/matrix)
          (planet schematics/mzgsl:1/gslvector)
+         (planet schematics/mzgsl:1/linear-least-squares)
          (planet williams/science:3/statistics)
          "point.ss"
          "util.ss")
@@ -102,36 +103,36 @@
                [divergence (polar-dot (polar-rotate normal rotation) n*)]
                [distance (polar-dot (polar+ (polar-rotate normal rotation) n*)
                                     (polar- p* (polar-rotate pt rotation)))])
-          (if (or (<= (abs distance) Hd)
-                  (<= (cos alpha) divergence))
-              (values found-pt found-normal)
-              (values p* n*))))))
+          ;;(printf "~a ~a ~a ~a ~a ~a ~a ~a\n" percentage r* n*-r n*-a p* n* divergence distance)
+          (if (and (<= (abs distance) Hd)
+                   (<= (cos alpha) divergence))
+              (values p* n*)
+              (values found-pt found-normal))))))
 
-;; optimise-translation
+;; optimise-translation ... -> vector
 ;;
 ;; Compute the least squares optimal translation given
 ;; points and their matches
 (define (optimise-translation points normals matches matching-normals rotation)
-  (define n (vector-length points))
-  (define x (make-matrix n 2))
-  (define y (make-vector n))  
-  ;; For each point,
-  (for ([p  (in-vector points)]
+  (define n-pts (vector-length points))
+  (define x (make-matrix n-pts 2))
+  (define y (make-vector n-pts))  
+
+  (for ([i  (in-range n-pts)]
+        [p  (in-vector points)]
         [n  (in-vector normals)]
         [p* (in-vector matches)]
         [n* (in-vector matching-normals)])
-  ;;  Calculate distance
-  ;;   (polar-dot (polar+ (polar-rotate normal rotation) n*)
-  ;;              (polar- p* (polar-rotate pt rotation)))
-  ;;  Calculate
-  ;;    (polar+ (polar-rotate normal rotation) n*)
-  ;;  and split into x and y coordinates
-  ;;
-  ;;  Construct least squares equations
-  ;;    Cx Cy = D
-  ;;  Solve
-       )
-  )
+       (let* ([d (polar-dot (polar+ (polar-rotate n rotation) n*)
+                            (polar- p* (polar-rotate p rotation)))]
+              [c (polar->cartesian (polar+ (polar-rotate n rotation) n*))]
+              [cx (cartesian-x c)]
+              [cy (cartesian-y c)])
+         (matrix-set! x i 0 cx)
+         (matrix-set! x i 1 cy)
+         (vector-set! y i d)))
+  (solve x y))
+
 
 
 (provide
@@ -139,4 +140,8 @@
  filter-points
 
  filter-bounded-obstacle
- filter-opaque)
+ filter-opaque
+
+ matching-point
+ 
+ optimise-translation)
