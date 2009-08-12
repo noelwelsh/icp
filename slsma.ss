@@ -7,6 +7,7 @@
          (planet schematics/mzgsl:1/linear-least-squares)
          (planet williams/science:3/statistics)
          "point.ss"
+         "tangent.ss"
          "util.ss")
 
 ;; The "search/least-squares matching algorithm"
@@ -109,7 +110,16 @@
               (values p* n*)
               (values found-pt found-normal))))))
 
-;; optimise-translation ... -> vector
+;; (Vectorof Polar) (Vectorof Polar) (Vectorof Polar) (Vectorof Polar) Number Number Number -> (values (Vectorof (U Polar #f)) (Vectorof (U Polar #f)))
+(define (matching-points pts normals ref-pts ref-normals rotation alpha Hd)
+  (define n-points (vector-length pts))
+  (for/vector ([i n-points 2]
+               [pt (in-vector pts)])
+    (matching-point pt normals ref-pts ref-normals rotation alpha Hd)))
+
+
+;; (Vectorof Polar) (Vectorof Polar) (Vectorof Polar) (Vectorof Polar) Number ->
+;;   (values (Vector Number Number) Number)
 ;;
 ;; Compute the least squares optimal translation given
 ;; points and their matches
@@ -123,6 +133,7 @@
         [n  (in-vector normals)]
         [p* (in-vector matches)]
         [n* (in-vector matching-normals)])
+       ;; TODO: handle case when p* is #f (i.e. no match exists)
        (let* ([d (polar-dot (polar+ (polar-rotate n rotation) n*)
                             (polar- p* (polar-rotate p rotation)))]
               [c (polar->cartesian (polar+ (polar-rotate n rotation) n*))]
@@ -134,6 +145,44 @@
   (solve x y))
 
 
+;; ('a -> (values 'a Number)) Number Number Number -> (values Number 'a)
+(define (golden-section-search solve start-r end-r tolerance)
+  ;; Golden ration conjugate
+  (define Phi (- (/ (+ 1 (sqrt 5)) 2) 1))
+  (define mid (+ start-r (* Phi (- end-r start-r))))
+  (define-values (start-soln start-err) (solve start-r))
+  (define-values (end-soln end-err) (solve end-r))
+  (define-values (mid-soln mid-err) (solve mid))
+  
+  (let loop ([start start-r] [start-soln start-soln] [start-err start-err]
+             [mid mid] [mid-soln mid-soln] [mid-err mid-err]
+             [end end-r] [end-soln end-soln] [end-err end-err])
+    (define new (+ start end (- mid)))
+    (define-values (new-soln new-err) (solve new))
+
+    (cond
+     [(< (abs (- new start)) (* tolerance (+ (abs mid) (abs end))))
+      (values mid mid-soln)]
+     [(< new-err mid-err)
+      (loop mid mid-soln mid-err new new-soln new-err end end-soln end-err)]
+     [(>= new-err mid-err)
+      (loop start start-soln start-err mid mid-soln mid-err new new-soln new-err)])))
+;; ... -> (values Number (Vector Number Number))
+;;
+;; Returns optimal rotation and transformation
+(define (find-optimal-transformation new-pts new-pose ref-pts ref-pose
+                                     neighbourhood angle-limit error-limit
+                                     alpha Hd
+                                     rotation-min rotation-max tolerance)
+  (let* ([proj-pts (project-points ref-pts ref-pose new-pose)]
+         [ref-norms (fit-tangents proj-pts neighbourhood angle-limit error-limit)]
+         [new-norms (fit-tangents new-pts neighbourhood angle-limit error-limit)])
+    (define (solve rotation)
+      (define-values (matches normals)
+        (matching-points new-pts new-norms ref-pts ref-norms rotation alpha Hd))
+      (optimise-translation new-pts new-norms matches normals rotation))
+    (golden-section-search solve rotation-min rotation-max tolerance)))
+
 
 (provide
  project-points
@@ -144,4 +193,6 @@
 
  matching-point
  
- optimise-translation)
+ optimise-translation
+
+ find-optimal-transformation)
