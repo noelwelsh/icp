@@ -94,4 +94,12 @@
    (define t (optimise-translation pts pts t-pts t-pts (/ pi 4)))
    (check-= (vector-ref t 0) .2 e)
    (check-= (vector-ref t 1) .2 e))
+
+  (test-case
+   "golden-section-search find minimum"
+   (define-values (pt val)
+     (golden-section-search
+      (lambda (x) (let ([y (* (- x 2) (- x 2))]) (values y (abs (- y 0))))) -3 5 e))
+   (check-= pt 2.0 (sqrt e))
+   (check-= val 0.0 e))
   )

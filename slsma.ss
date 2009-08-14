@@ -193,12 +193,11 @@
          (vector-set! y i d)))
   (solve x y))
 
-
 ;; ('a -> (values 'a Number)) Number Number Number -> (values Number 'a)
 (define (golden-section-search solve start-r end-r tolerance)
   ;; Golden ration conjugate
   (define Phi (- (/ (+ 1 (sqrt 5)) 2) 1))
-  (define mid (+ start-r (* Phi (- end-r start-r))))
+  (define mid (+ start-r (* (- 1 Phi) (- end-r start-r))))
   (define-values (start-soln start-err) (solve start-r))
   (define-values (end-soln end-err) (solve end-r))
   (define-values (mid-soln mid-err) (solve mid))
@@ -206,16 +205,21 @@
   (let loop ([start start-r] [start-soln start-soln] [start-err start-err]
              [mid mid] [mid-soln mid-soln] [mid-err mid-err]
              [end end-r] [end-soln end-soln] [end-err end-err])
-    (define new (+ start end (- mid)))
+    (define new (- end (- mid start)))
     (define-values (new-soln new-err) (solve new))
-
+    
     (cond
-     [(< (abs (- new start)) (* tolerance (+ (abs mid) (abs end))))
+     [(< mid-err tolerance)
       (values mid mid-soln)]
      [(< new-err mid-err)
-      (loop mid mid-soln mid-err new new-soln new-err end end-soln end-err)]
+      (if (< mid new)
+          (loop mid mid-soln mid-err new new-soln new-err end end-soln end-err)
+          (loop start start-soln start-err new new-soln new-err mid mid-soln mid-err))]
      [(>= new-err mid-err)
-      (loop start start-soln start-err mid mid-soln mid-err new new-soln new-err)])))
+      (if (< mid new)
+          (loop start start-soln start-err mid mid-soln mid-err new new-soln new-err)
+          (loop new new-soln new-err mid mid-soln mid-err end end-soln end-err))])))
+
 ;; ... -> (values Number (Vector Number Number))
 ;;
 ;; Returns optimal rotation and transformation
@@ -247,4 +251,6 @@
  
  optimise-translation
 
+ golden-section-search
+ 
  optimal-transformation)
