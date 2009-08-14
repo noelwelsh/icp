@@ -224,8 +224,10 @@
                                 alpha Hd
                                 rotation-min rotation-max tolerance)
   (let* ([proj-pts (project-points ref-pts ref-pose new-pose)]
-         [ref-norms (fit-tangents proj-pts neighbourhood angle-limit error-limit)]
-         [new-norms (fit-tangents new-pts neighbourhood angle-limit error-limit)])
+         [ref-norms (fit-tangents (vector-map polar->cartesian proj-pts)
+                                  neighbourhood angle-limit error-limit)]
+         [new-norms (fit-tangents (vector-map polar->cartesian new-pts)
+                                  neighbourhood angle-limit error-limit)])
     (define (solve rotation)
       (define-values (matches normals)
         (matching-points new-pts new-norms ref-pts ref-norms rotation alpha Hd))
