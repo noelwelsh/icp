@@ -3,6 +3,8 @@
 (require (planet schematics/schemeunit:3/test))
 (require "point.ss")
 
+(define e 0.00001)
+
 (define/provide-test-suite point-tests
   (test-case
    "cartesian->polar and polar->cartesian are inverses"
@@ -36,5 +38,25 @@
                      (cartesian- (polar->cartesian p1) (polar->cartesian p2)))))
     pts1
     pts2))
-   
+
+  (test-case
+   "cartesian-distance"
+   (check-pred zero? (cartesian-distance (make-cartesian 3 3) (make-cartesian 3 3)))
+   (check-= (cartesian-distance (make-cartesian 3 0) (make-cartesian 0 0)) 3 e)
+   (check-= (cartesian-distance (make-cartesian 3 0) (make-cartesian 3 3)) 3 e)
+   (check-= (cartesian-distance (make-cartesian 0 0) (make-cartesian 4 3)) 5 e))
+
+  (test-case
+   "cartesian-dot"
+   (map
+    (lambda (x1 y1 x2 y2)
+      (check-= (cartesian-dot (make-cartesian x1 y1)
+                              (make-cartesian x2 y2))
+               (+ (* x1 x2) (* y1 y2))
+               e))
+    '(0 1 2 3 4 5)
+    '(0 3 0 4 5 1)
+    '(0 4 7 0 3 4)
+    '(0 4 8 3 0 1)))
+  
   )

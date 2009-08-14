@@ -39,6 +39,16 @@
 
   (make-cartesian (- x1 x2) (- y1 y2)))
 
+(define (cartesian-distance p1 p2)
+  (match-define (struct cartesian (x y)) (cartesian- p1 p2))
+
+  (sqrt (+ (* x x) (* y y))))
+
+(define (cartesian-dot p1 p2)
+  (match-define (struct cartesian (x1 y1)) p1)
+  (match-define (struct cartesian (x2 y2)) p2)
+
+  (+ (* x1 x2) (* y1 y2)))
 
 
 (define (polar+ p1 p2)
@@ -99,7 +109,9 @@
 
  cartesian+
  cartesian-
-
+ cartesian-distance
+ cartesian-dot
+ 
  polar+
  polar-
  polar-dot
