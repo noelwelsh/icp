@@ -23,11 +23,6 @@
     (cartesian+ (polar->cartesian (polar-rotate pt r-a))
                 (make-cartesian r-x r-y)))
   ;; Create the new basis
-;  (define new-x (cartesian+ (make-cartesian n-x n-y)
-;                            (polar->cartesian (make-polar 1 n-a))))
-;  (define new-y (cartesian+ (make-cartesian n-x n-y)
-;                            (polar->cartesian
-;                             (polar-rotate (make-polar 1 n-a) (/ pi 2)))))
   (define new-x (polar->cartesian (make-polar 1 n-a)))
   (define new-y (polar->cartesian (polar-rotate (make-polar 1 n-a) (/ pi 2))))
   (define t (matrix-invert
@@ -51,11 +46,30 @@
 ;;
 ;; pts must be ordered by angles smallest to largest
 (define (project-points pts ref-pose new-pose)
+  ;; This is faster than calling project-point for every point
+  (match-define (struct pose [r-x r-y r-a]) ref-pose)
+  (match-define (struct pose [n-x n-y n-a]) new-pose)
+  (define new-x (polar->cartesian (make-polar 1 n-a)))
+  (define new-y (polar->cartesian (polar-rotate (make-polar 1 n-a) (/ pi 2))))
+  (define t (matrix-invert
+             (matrix 2 2
+                     (cartesian-x new-x) (cartesian-x new-y)
+                     (cartesian-y new-x) (cartesian-y new-y))))
+  
   (for/vector ([i (vector-length pts)]
                [pt (in-vector pts)])
-              (cartesian->polar
-               (cartesian- (cartesian+ (polar->cartesian pt) ref-pose)
-                           new-pose))))
+              (define world-pt (cartesian+ (polar->cartesian (polar-rotate pt r-a))
+                                           (make-cartesian r-x r-y)))
+              (define new-pt
+                (let* ([pt (cartesian- world-pt (make-cartesian n-x n-y))]
+                       [v (matrix*v t (vector (cartesian-x pt) (cartesian-y pt)))])
+                  (make-cartesian (vector-ref v 0) (vector-ref v 1))))
+              (define r (cartesian-distance new-pt (make-cartesian 0 0)))
+              (define theta (atan (cartesian-y new-pt) (cartesian-x new-pt)))
+              (make-polar r
+                          (if (< theta 0)
+                              (+ theta (* 2 pi))
+                              theta))))
 
 ;; (Vectorof Polar) -> (Vectorof Polar)
 (define (filter-bounded-obstacle pts)

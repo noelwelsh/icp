@@ -28,7 +28,16 @@
 
    (check-= (polar-r pt2) 2 e)
    (check-= (polar-a pt2) (* pi 5/4) e))
-  
+
+  (test-case
+   "project-points"
+   (define pts (vector (make-polar 1 0) (make-polar 2 .3) (make-polar 0 .1)))
+   (define ref-pose (make-pose 4 2 2))
+   (define new-pose (make-pose 3 7 3))
+   (define proj-pts (project-points pts ref-pose new-pose))
+   (for ([pt (in-vector pts)]
+         [actual (in-vector proj-pts)])
+        (check-equal? actual (project-point pt ref-pose new-pose))))
   
   (test-case
    "filter-bounded-obstacle"
