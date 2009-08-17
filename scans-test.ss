@@ -13,7 +13,7 @@
 (define (pose+points->frame pose points)
   (dots
    (for/list ([pt (in-vector points)])
-     (let ([p (cartesian+ (polar->cartesian pt)
+     (let ([p (cartesian+ (polar->cartesian (polar-rotate pt (pose-a pose)))
                           (make-cartesian (pose-x pose) (pose-y pose)))])
        (vector-immutable (cartesian-x p) (cartesian-y p))))))
 

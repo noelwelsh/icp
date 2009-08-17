@@ -222,7 +222,7 @@
              [end end-r] [end-soln end-soln] [end-err end-err])
     (define new (- end (- mid start)))
     (define-values (new-soln new-err) (solve new))
-    (printf "golden-section-search: ~a ~a ~a: ~a\n" start mid end (- end start))
+    ;;(printf "golden-section-search: ~a ~a ~a: ~a\n" start mid end (- end start))
     (cond
      [(< (- end start) accuracy)
       (values mid mid-soln)]
