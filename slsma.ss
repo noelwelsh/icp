@@ -3,6 +3,7 @@
 (require scheme/match
          scheme/math
          (planet schematics/numeric:1/vector)
+         (planet schematics/numeric:1/for)
          (planet schematics/numeric:1/matrix)
          (planet schematics/mzgsl:1/gslvector)
          (planet schematics/mzgsl:1/linear-least-squares)
@@ -42,7 +43,7 @@
                   (+ theta (* 2 pi))
                   theta)))
   
-;; (Vectorof Polar) Cartesian Cartesian -> (Vectorof Polar)
+;; (Vectorof Polar) Pose Pose -> (Vectorof Polar)
 ;;
 ;; pts must be ordered by angles smallest to largest
 (define (project-points pts ref-pose new-pose)
@@ -118,7 +119,7 @@
   (filter-opaque (filter-bounded-obstacle ref-pts) new-pts angle))
 
 
-;; Polar Polar (Vectorof Polar) (Vectorof Polar) Number Number Number
+;; Polar Polar (Vectorof Polar) (Vectorof (U Polar #f)) Number Number Number
 ;;   -> (values (U Polar #f) (U Polar #f)
 ;;
 ;; Finds the closest matching point and normal, or #f if no
@@ -133,7 +134,8 @@
       ([p1 (in-vector pts)]
        [n1 (in-vector normals)]
        [p2 (in-vector pts 1)]
-       [n2 (in-vector normals 1)])
+       [n2 (in-vector normals 1)]
+       #:when (and n1 n2))
     (match-define (struct polar (r1 a1)) p1)
     (match-define (struct polar (r2 a2)) p2)
 
@@ -159,39 +161,51 @@
               (values p* n*)
               (values found-pt found-normal))))))
 
-;; (Vectorof Polar) (Vectorof Polar) (Vectorof Polar) (Vectorof Polar) Number Number Number -> (values (Vectorof (U Polar #f)) (Vectorof (U Polar #f)))
+;; (Vectorof Polar) (Vectorof (U Polar #f))
+;; (Vectorof Polar) (Vectorof (U Polar #f))
+;; Number Number Number
+;;   ->
+;; (values (Vectorof (U Polar #f)) (Vectorof (U Polar #f)))
 (define (matching-points pts normals ref-pts ref-normals rotation alpha Hd)
   (define n-points (vector-length pts))
   (for/vector ([i n-points 2]
-               [pt (in-vector pts)])
-    (matching-point pt normals ref-pts ref-normals rotation alpha Hd)))
+               [pt (in-vector pts)]
+               [n  (in-vector normals)])
+    (if n
+        (matching-point pt n ref-pts ref-normals rotation alpha Hd)
+        (values #f #f))))
 
 
-;; (Vectorof Polar) (Vectorof Polar) (Vectorof Polar) (Vectorof Polar) Number ->
+;; (Vectorof Polar) (Vectorof (U Polar #f)) (Vectorof (U Polar #f)) (Vectorof (U Polar #f)) Number ->
 ;;   (values (Vector Number Number) Number)
 ;;
 ;; Compute the least squares optimal translation given
 ;; points and their matches
+;;
+;; Returns least squares solution and error
 (define (optimise-translation points normals matches matching-normals rotation)
-  (define n-pts (vector-length points))
+  (define n-pts (for/sum ([p (in-vector matches)]) (if p 1 0)))
   (define x (make-matrix n-pts 2))
-  (define y (make-vector n-pts))  
+  (define y (make-gslvector n-pts))  
 
-  (for ([i  (in-range n-pts)]
-        [p  (in-vector points)]
-        [n  (in-vector normals)]
-        [p* (in-vector matches)]
-        [n* (in-vector matching-normals)])
-       ;; TODO: handle case when p* is #f (i.e. no match exists)
-       (let* ([d (polar-dot (polar+ (polar-rotate n rotation) n*)
-                            (polar- p* (polar-rotate p rotation)))]
-              [c (polar->cartesian (polar+ (polar-rotate n rotation) n*))]
-              [cx (cartesian-x c)]
-              [cy (cartesian-y c)])
-         (matrix-set! x i 0 cx)
-         (matrix-set! x i 1 cy)
-         (vector-set! y i d)))
-  (solve x y))
+  (for/fold ([i 0])
+      ([p  (in-vector points)]
+       [n  (in-vector normals)]
+       [p* (in-vector matches)]
+       [n* (in-vector matching-normals)])
+    (if (and n p* n*)
+        (let* ([d (polar-dot (polar+ (polar-rotate n rotation) n*)
+                             (polar- p* (polar-rotate p rotation)))]
+               [c (polar->cartesian (polar+ (polar-rotate n rotation) n*))]
+               [cx (cartesian-x c)]
+               [cy (cartesian-y c)])
+          (matrix-set! x i 0 cx)
+          (matrix-set! x i 1 cy)
+          (gslvector-set! y i d)
+          (add1 i))
+        i))
+  (let-values (([t cov err] (least-squares-multiparameter x y)))
+    (values (gslvector->vector t) err)))
 
 ;; ('a -> (values 'a Number)) Number Number Number -> (values Number 'a)
 (define (golden-section-search solve start-r end-r tolerance)
@@ -207,7 +221,7 @@
              [end end-r] [end-soln end-soln] [end-err end-err])
     (define new (- end (- mid start)))
     (define-values (new-soln new-err) (solve new))
-    
+    (printf "golden-section-search: ~a ~a ~a: ~a\n" start mid end mid-err)
     (cond
      [(< mid-err tolerance)
       (values mid mid-soln)]
@@ -224,17 +238,23 @@
 ;;
 ;; Returns optimal rotation and transformation
 (define (optimal-transformation new-pts new-pose ref-pts ref-pose
+                                occlusion-angle
                                 neighbourhood angle-limit error-limit
                                 alpha Hd
                                 rotation-min rotation-max tolerance)
   (let* ([proj-pts (project-points ref-pts ref-pose new-pose)]
-         [ref-norms (fit-tangents (vector-map polar->cartesian proj-pts)
+         [filtered-proj-pts (filter-points proj-pts new-pts occlusion-angle)]
+         ;; (U Polar #f)
+         [ref-norms (fit-tangents (vector-map polar->cartesian filtered-proj-pts)
                                   neighbourhood angle-limit error-limit)]
+         ;; (U Polar #f)
          [new-norms (fit-tangents (vector-map polar->cartesian new-pts)
                                   neighbourhood angle-limit error-limit)])
     (define (solve rotation)
+      ;; (U Polar #f) (U Polar #f)
       (define-values (matches normals)
-        (matching-points new-pts new-norms ref-pts ref-norms rotation alpha Hd))
+        (matching-points new-pts new-norms filtered-proj-pts ref-norms
+                         rotation alpha Hd))
       (optimise-translation new-pts new-norms matches normals rotation))
     (golden-section-search solve rotation-min rotation-max tolerance)))
 
@@ -248,7 +268,8 @@
  filter-opaque
 
  matching-point
- 
+ matching-points
+
  optimise-translation
 
  golden-section-search

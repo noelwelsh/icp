@@ -34,13 +34,15 @@
     (define-values (new-pose new-pts) (process-scan scan2))
     (define-values (opt-r opt-t)
       (optimal-transformation new-pts new-pose ref-pts ref-pose
-                              5 .5 5
+                              .004 ;; About .25 degrees
+                              5 1.05 5
                               1 5
-                              -.5 .5 5))
+                              -.5 .5 238))
     (define opt-pose
       (make-pose (+ (pose-x new-pose) (vector-ref opt-t 0))
                  (+ (pose-y new-pose) (vector-ref opt-t 1))
                  (+ (pose-a new-pose) opt-r)))
+    (printf "Found optimal translation of ~a and rotation of ~a\n" opt-t opt-r)
     (colour (pose+points->frame opt-pose new-pts) (vector-immutable 0 0 255))))
 
 

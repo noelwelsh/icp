@@ -79,6 +79,15 @@
     (check-equal? normal (make-polar 4 0)))
 
   (test-case
+   "matching-points find expected matches"
+   (define pts (vector (make-polar 4 0) (make-polar 4 (/ pi 2))
+                       (make-polar 4 pi) (make-polar 4 (* pi 3/2))))
+   (define-values (matches normals)
+     (matching-points pts pts pts pts 0 10 10))
+   (check-equal? matches pts)
+   (check-equal? normals pts))
+
+  (test-case
    "optimise-translation finds optimal"
    ;; A square. The normals are the same as the points
    (define pts (vector (make-polar 4 0) (make-polar 4 (/ pi 2))
@@ -91,9 +100,10 @@
               (cartesian+ (polar->cartesian (polar-rotate pt (/ pi 4)))
                           (make-cartesian .2 .2))))
            (vector->list pts))))
-   (define t (optimise-translation pts pts t-pts t-pts (/ pi 4)))
+   (define-values (t err) (optimise-translation pts pts t-pts t-pts (/ pi 4)))
    (check-= (vector-ref t 0) .2 e)
-   (check-= (vector-ref t 1) .2 e))
+   (check-= (vector-ref t 1) .2 e)
+   (check-= err 0.0 e))
 
   (test-case
    "golden-section-search find minimum"

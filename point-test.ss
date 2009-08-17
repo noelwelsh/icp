@@ -1,11 +1,29 @@
 #lang scheme/base
 
-(require (planet schematics/schemeunit:3/test))
-(require "point.ss")
+(require scheme/math
+         (planet schematics/schemeunit:3/test)
+         "point.ss")
 
 (define e 0.00001)
 
 (define/provide-test-suite point-tests
+  (test-case
+   "polar->cartesian"
+   (check-equal? (polar->cartesian (make-polar 3 0))
+                 (make-cartesian 3 0))
+   (check-point (polar->cartesian (make-polar 3 (* pi -3/4)))
+                (make-cartesian (- (sqrt 4.5)) (- (sqrt 4.5)))
+                e)
+   (check-point (polar->cartesian (make-polar 3 (* pi 3/4)))
+                (make-cartesian (- (sqrt 4.5)) (sqrt 4.5))
+                e)
+   (check-point (polar->cartesian (make-polar 3 (/ pi 4)))
+                (make-cartesian (sqrt 4.5) (sqrt 4.5))
+                e)
+   (check-point (polar->cartesian (make-polar 3 (/ pi -4)))
+                (make-cartesian (sqrt 4.5) (- (sqrt 4.5)))
+                e))
+
   (test-case
    "cartesian->polar and polar->cartesian are inverses"
    (define points
