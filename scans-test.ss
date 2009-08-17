@@ -37,7 +37,7 @@
                               .004 ;; About .25 degrees
                               5 1.05 5
                               1 5
-                              -.5 .5 238))
+                              -.5 .5 .005))
     (define opt-pose
       (make-pose (+ (pose-x new-pose) (vector-ref opt-t 0))
                  (+ (pose-y new-pose) (vector-ref opt-t 1))

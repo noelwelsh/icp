@@ -212,6 +212,7 @@
   ;; Golden ration conjugate
   (define Phi (- (/ (+ 1 (sqrt 5)) 2) 1))
   (define mid (+ start-r (* (- 1 Phi) (- end-r start-r))))
+  (define accuracy (* tolerance (- end-r start-r)))
   (define-values (start-soln start-err) (solve start-r))
   (define-values (end-soln end-err) (solve end-r))
   (define-values (mid-soln mid-err) (solve mid))
@@ -221,9 +222,9 @@
              [end end-r] [end-soln end-soln] [end-err end-err])
     (define new (- end (- mid start)))
     (define-values (new-soln new-err) (solve new))
-    (printf "golden-section-search: ~a ~a ~a: ~a\n" start mid end mid-err)
+    (printf "golden-section-search: ~a ~a ~a: ~a\n" start mid end (- end start))
     (cond
-     [(< mid-err tolerance)
+     [(< (- end start) accuracy)
       (values mid mid-soln)]
      [(< new-err mid-err)
       (if (< mid new)
