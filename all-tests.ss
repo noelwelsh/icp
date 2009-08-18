@@ -5,6 +5,7 @@
          "point-test.ss"
          "slsma-test.ss"
          "tangent-test.ss"
+         "geometry-test.ss"
          "util-test.ss")
 
 (define/provide-test-suite all-tests
@@ -12,4 +13,5 @@
   point-tests
   slsma-tests
   tangent-tests
+  geometry-tests
   util-tests)

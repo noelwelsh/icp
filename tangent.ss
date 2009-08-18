@@ -8,8 +8,6 @@
          "point.ss"
          "util.ss")
 
-(define (square x) (* x x))
-
 ;; (Vectorof Cartesian) Number Number Number -> (Vectorof (U Polar #f))
 (define (fit-tangents pts neighbourhood angle-limit error-limit)
   (define n-pts (vector-length pts))

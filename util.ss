@@ -1,5 +1,8 @@
 #lang scheme/base
 
+;; Number -> Number
+(define (square x) (* x x))
+
 ;; (Vectorof Number) -> Number
 ;; (Vectorof Number) (Vectorof Number) -> Number
 ;;
@@ -37,4 +40,6 @@
 
      (+ sum-xy (- (* mean-x sum-y)) (- (* mean-y sum-x)) (* n mean-x mean-y))]))
 
-(provide sse)
+(provide
+ square
+ sse)
