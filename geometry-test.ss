@@ -37,4 +37,9 @@
    (check-closest-point (make-cartesian -3 3) (make-cartesian 3 3)
                         (make-cartesian 0 3)
                         (make-cartesian 0 3) 0))
+
+
+  (test-case
+   "line-line-intersection"
+   (fail "Not implemented"))
   )
