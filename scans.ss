@@ -53,5 +53,7 @@
  scan1
  scan2
 
+ degrees->radians
+ 
  process-scan
  write-scan)

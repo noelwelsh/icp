@@ -32,12 +32,16 @@
   (let ()
     (define-values (ref-pose ref-pts) (process-scan scan1))
     (define-values (new-pose new-pts) (process-scan scan2))
+    (define expected-r (- (pose-a new-pose) (pose-a ref-pose)))
+    
     (define-values (opt-r opt-t)
       (optimal-transformation new-pts new-pose ref-pts ref-pose
                               .004 ;; About .25 degrees
                               5 1.05 5
                               1 5
-                              -.5 .5 .005))
+                              (- expected-r (degrees->radians 15))
+                              (+ expected-r (degrees->radians 15))
+                              .005))
     (define opt-pose
       (make-pose (+ (pose-x new-pose) (vector-ref opt-t 0))
                  (+ (pose-y new-pose) (vector-ref opt-t 1))
