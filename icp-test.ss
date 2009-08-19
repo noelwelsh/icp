@@ -7,6 +7,9 @@
 
 (define e 0.001)
 
+(define (make-ellipse-points xc yc phi interval)
+  (for
+
 (define/provide-test-suite icp-tests
   (test-case
    "matching-point finds match when end point is closest"

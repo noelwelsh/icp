@@ -1,10 +1,9 @@
-Implementation of an Iterative Closest Point (ICP) algorithm
------------------------------------------------
+h2 Implementation of an Iterative Closest Point (ICP) algorithm
 
 This is an implementation of the ICP algorithm given in Lu & Milios, "Robot Pose Estimation in Unknown Environments by Matching 2D Range Scans". It can be used to find the rotation and transform that gives a locally optimal alignment of one set of points with another. The actual algorithm consists of three subalgorithms:
 
-1. SLSMA
+# SLSMA
 
-2. IMRP
+# IMRP
 
-3. ICP (confusing, I know)
+# ICP (confusing, I know)
