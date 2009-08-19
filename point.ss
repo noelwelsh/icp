@@ -50,6 +50,23 @@
 
   (+ (* x1 x2) (* y1 y2)))
 
+;; cartesian-transform : Cartesian Number Number Number -> Cartesian
+;;
+;; Transform a point by a translation and a rotation. We
+;; assume the rotation is about the origin, and is performed
+;; before the translation
+(define (cartesian-transform p xt yt a)
+  (match-define (struct cartesian (x y)) p)
+
+  ;; Rotation matrix is
+  ;;   cos a  -sin a
+  ;;   sin a   cos a
+  (define cosa (cos a))
+  (define sina (sin a))
+  
+  (make-cartesian (+ (* cosa x) (- (* sina y)) xt)
+                  (+ (* sina x) (* cosa y) yt)))
+
 
 (define (polar+ p1 p2)
   ;; Note that r can also be calculated as
@@ -111,6 +128,7 @@
  cartesian-
  cartesian-distance
  cartesian-dot
+ cartesian-transform
  
  polar+
  polar-

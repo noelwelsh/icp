@@ -7,13 +7,13 @@
          "geometry.ss"
          "util.ss")
 
-;; (Vectorof Polar) (Vectorof Polar) Number -> (Vectorof Polar)
+;; (Vectorof Polar) (Vectorof Polar) Number -> (Vectorof (U Polar #f))
 (define (matching-points scan-pts model-pts rotation)
   (for/vector ([i (vector-length scan-pts)]
                [pt (in-vector scan-pts)])
               (matching-point pt model-pts rotation)))
 
-;; Polar (Vectorof Polar) Number -> Polar
+;; Polar (Vectorof Polar) Number -> (U Polar #f)
 ;;
 ;; pts must be sorted by angle from low to high
 (define (matching-point p pts rotation)
@@ -61,7 +61,7 @@
 (define (interpolate-point-to-angle p1 p2 a)
   (cartesian->polar
    (line-line-intersection
-    p1 p2
+    (polar->cartesian p1) (polar->cartesian p2)
     (polar->cartesian (make-polar 1 a)) (make-cartesian 0 0))))
 
 
@@ -78,6 +78,7 @@
 
 ;; (Vectorof Polar) (Vectorof Polar) -> (values Number Number Number)
 (define (optimal-transformation scan-pts matching-pts)
+  ;; TODO: Handle matches that are #f
   (define s-pts (vector-map polar->cartesian scan-pts))
   (define m-pts (vector-map polar->cartesian matching-pts))
 
@@ -103,9 +104,27 @@
   (values t-x t-y angle))
 
 
+;; (Vectorof Polar) (Vectorof Polar) Number Number Number Number
+;;   ->
+;; (values Number Number Number)
 ;;
-(define (idc ref-pts ref-pose new-pts new-pose)
-  (void))
+;; One iteration of the IDC algorithm. We assume ref-pts
+;; have already been projected to the same reference frame.
+;;
+;; xt, yt, and a are the starting transformation
+;; (translation and rotation) Result is new found
+;; translation and rotation, which should be applied in
+;; addition to xt, yt, and a.
+(define (icp ref-pts new-pts xt yt a rotation)
+  (define transformed-pts
+    (vector-map
+     (lambda (pt)
+       (cartesian->polar (cartesian-transform (polar->cartesian pt) xt yt a)))
+     new-pts))
+  (define matching-pts
+    (matching-points transformed-pts ref-pts rotation))
+  (optimal-transformation transformed-pts matching-pts))
+
 
 (provide
  matching-points
@@ -114,4 +133,6 @@
  interpolate-point-to-range
  interpolate-point-to-angle
 
- optimal-transformation)
+ optimal-transformation
+
+ icp)
