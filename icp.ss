@@ -102,6 +102,11 @@
 
   (values t-x t-y angle))
 
+
+;;
+(define (idc ref-pts ref-pose new-pts new-pose)
+  (void))
+
 (provide
  matching-points
  matching-point

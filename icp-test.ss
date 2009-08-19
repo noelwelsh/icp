@@ -20,10 +20,10 @@
    "matching-point finds interpolated point"
    (check-point
     (matching-point (make-polar 3 0)
-                    (vector (make-polar 4 .1) (make-polar 2 0) (make-polar 3 -.1))
+                    (vector (make-polar 3 -.1)  (make-polar 2 0) (make-polar 4 .1))
                    .2)
     (let-values (([p d]
-                  (closest-point (make-polar 3 0) (make-polar 2 0) (make-polar 4 -.1))))
+                  (closest-point (make-polar 3 0) (make-polar 2 0) (make-polar 4 .1))))
       p)
     e))
 
