@@ -27,6 +27,7 @@
           (cartesian-distance closest-pt pt))
         (values closest-pt dist))))
 
+;; Cartesian Cartesian Cartesian Cartesian -> Cartesian
 (define (line-line-intersection pt1 pt2 pt3 pt4)
   (match-define (struct cartesian [x1 y1]) pt1)
   (match-define (struct cartesian [x2 y2]) pt2)

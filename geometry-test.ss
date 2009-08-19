@@ -4,8 +4,9 @@
          "geometry.ss"
          "point.ss")
 
+(define e 0.00001)
+
 (define-check (check-closest-point pt1 pt2 pt expected-pt dist)
-  (define e 0.00001)
   (define-values (closest-pt closest-dist) (line-segment-closest-point pt1 pt2 pt))
   (check-point closest-pt expected-pt e)
   (check-= closest-dist dist e))
@@ -40,6 +41,18 @@
 
 
   (test-case
-   "line-line-intersection"
-   (fail "Not implemented"))
+   "line-line-intersection, horizontal and vertical line"
+   (check-point (line-line-intersection
+                 (make-cartesian -3 0) (make-cartesian 3 0)
+                 (make-cartesian 0 -3) (make-cartesian 0 3))
+                (make-cartesian 0 0)
+                e))
+
+  (test-case
+   "line-line-intersection, diagonal lines"
+   (check-point (line-line-intersection
+                 (make-cartesian -3 -3) (make-cartesian 3 3)
+                 (make-cartesian -3 3) (make-cartesian 3 -3))
+                (make-cartesian 0 0)
+                e))
   )
