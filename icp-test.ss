@@ -2,13 +2,27 @@
 
 (require scheme/math
          (planet schematics/schemeunit:3/test)
+         (planet schematics/numeric:1/vector)
          "icp.ss"
          "point.ss")
 
 (define e 0.001)
 
-(define (make-ellipse-points xc yc phi interval)
-  (for
+;; Number Number Number Number Number Number -> (Vectorof Cartesian)
+;;
+;; Constructs points evenly spaced a step radians around an ellipse.
+;; xc and yc are the center coordinates
+;; a and b are the semimajor and semiminor axis respectively
+;; phi is the angle the semimajor axis makes to the x axis
+(define (make-ellipse-points xc yc a b phi step)
+  (list->vector
+   (for/list ([t (in-range 0 (* 2 pi) step)])
+     (make-cartesian (+ xc
+                        (* a (cos t) (cos phi))
+                        (- (* b (sin t) (sin phi))))
+                     (+ yc
+                        (* a (cos t) (sin phi))
+                        (* b (sin t) (cos phi)))))))
 
 (define/provide-test-suite icp-tests
   (test-case
@@ -50,4 +64,10 @@
                          (list 0 .1 .2 .3 .4 .5))))
    (define-values (xt yt a) (icp ref-pts new-pts 0 0 0 .25))
    (check < a 0))
+
+  (test-case
+   "Iterations of icp converge to true transform for an ellipse"
+   (define ref-pts (vector-map cartesian->polar (make-ellipse-points 5 5 3 2 .1 .1)))
+   (define new-pts (vector-map cartesian->polar (make-ellipse-points 6 6 3 2 .15 .1)))
+   (fail "Not implemented"))
   )
