@@ -87,7 +87,7 @@
                  #:when m)
       (values p m)))
   
-  (define s-pts (begin (printf "~a \n~a \n~a \n~a \n~a\n" ref-pts match-pts n-actual-matches scan-pts matching-pts) (vector-map polar->cartesian scan-pts)))
+  (define s-pts (vector-map polar->cartesian scan-pts))
   (define m-pts (vector-map polar->cartesian matching-pts))
 
   (define s-xs (vector-map cartesian-x s-pts))

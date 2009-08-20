@@ -84,8 +84,8 @@
          ([i (in-range 10)])
        (define-values (next-tx next-ty next-a next-rotation)
          (let-values (([ntx nty na] (icp ref-pts new-pts tx ty a rotation)))
-           (values (+ tx ntx) (+ ty nty) (+ a na) (abs na))))
-       (printf "Iteration ~a: ~a ~a ~a ~a\n" i next-tx next-ty next-a next-rotation)
+           (values (+ tx ntx) (+ ty nty) (+ a na) (* 2 (abs na)))))
+       ;;(printf "Iteration ~a: ~a ~a ~a ~a\n" i next-tx next-ty next-a next-rotation)
        ;;(check <
        ;;       (cartesian-distance (make-cartesian next-tx next-ty) (make-cartesian true-tx true-ty))
        ;;       (cartesian-distance (make-cartesian tx ty) (make-cartesian true-tx true-ty)))

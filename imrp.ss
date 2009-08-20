@@ -2,6 +2,7 @@
 
 (require scheme/match
          (planet schematics/numeric:1/vector)
+         (planet schematics/numeric:1/for)
          (planet williams/science:3/statistics)
          "point.ss"
          "util.ss")
@@ -93,7 +94,15 @@
 
 
 ;; (Vectorof Polar) (Vectorof Polar) -> (values Number Number Number)
-(define (optimal-transformation scan-pts matching-pts)
+(define (optimal-transformation ref-pts match-pts)
+  (define n-actual-matches (for/sum ([x (in-vector match-pts)]) (if x 1 0)))
+  (define-values (scan-pts matching-pts)
+    (for/vector ([i n-actual-matches 2]
+                 [p (in-vector ref-pts)]
+                 [m (in-vector match-pts)]
+                 #:when m)
+      (values p m)))
+
   (define s-pts (vector-map polar->cartesian scan-pts))
   (define m-pts (vector-map polar->cartesian matching-pts))
 
