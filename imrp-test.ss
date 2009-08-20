@@ -4,7 +4,8 @@
          (planet schematics/schemeunit:3/test)
          (planet schematics/numeric:1/vector)
          "imrp.ss"
-         "point.ss")
+         "point.ss"
+         "geometry.ss")
 
 (define/provide-test-suite imrp-tests
   (test-case
@@ -88,4 +89,23 @@
      (optimal-transformation scan-pts matching-pts))
    (check-= tx 0.1 0.00001)
    (check-= ty 0.1 0.00001))
+
+  (test-case
+   "Iterations of imrp converge to true transform for an ellipse"
+   (define ref-pts (vector-map cartesian->polar (make-ellipse-points 5 5 40 20 .10 .1)))
+   (define new-pts (vector-map cartesian->polar (make-ellipse-points 6 6 40 20 .40 .1)))
+   (define-values (true-tx true-ty true-r) (values -1 -1 -.3))
+   (define-values (tx ty r)
+     (for/fold ([tx -1] [ty -1] [r -.3])
+         ([i (in-range 10)])
+       (define-values (next-tx next-ty next-r)
+         (let-values (([ntx nty nr] (imrp ref-pts new-pts tx ty r .2)))
+           (values (+ tx ntx) (+ ty nty) (+ r nr))))
+       (printf "Iteration ~a: ~a ~a ~a\n" i next-tx next-ty next-r)
+       '(check <
+              (cartesian-distance (make-cartesian next-tx next-ty) (make-cartesian true-tx true-ty))
+              (cartesian-distance (make-cartesian tx ty) (make-cartesian true-tx true-ty)))
+       (check < (abs (- next-r true-r)) (abs (- r true-r)))
+       (values next-tx next-ty next-r)))
+   #t)
   )

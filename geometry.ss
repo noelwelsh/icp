@@ -114,8 +114,28 @@
                               theta))))
 
 
+;; Number Number Number Number Number Number -> (Vectorof Cartesian)
+;;
+;; Constructs points evenly spaced at step radians around an ellipse.
+;; xc and yc are the center coordinates
+;; a and b are the semimajor and semiminor axis respectively
+;; phi is the angle the semimajor axis makes to the x axis
+(define (make-ellipse-points xc yc a b phi step)
+  (list->vector
+   (for/list ([t (in-range 0 (* 2 pi) step)])
+     (make-cartesian (+ xc
+                        (* a (cos t) (cos phi))
+                        (- (* b (sin t) (sin phi))))
+                     (+ yc
+                        (* a (cos t) (sin phi))
+                        (* b (sin t) (cos phi)))))))
+
+
+
 (provide line-segment-closest-point
          line-line-intersection
 
          project-point
-         project-points)
+         project-points
+
+         make-ellipse-points)

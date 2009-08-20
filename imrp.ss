@@ -118,6 +118,28 @@
 
   (values t-x t-y angle))
 
+;; (Vectorof Polar) (Vectorof Polar) Number Number Number Number
+;;   ->
+;; (values Number Number Number)
+;;
+;; One iteration of the IMRP algorithm. We assume ref-pts
+;; have already been projected to the same reference frame.
+;;
+;; xt, yt, and a are the starting transformation
+;; (translation and rotation) Result is new found
+;; translation and rotation, which should be applied in
+;; addition to xt, yt, and a.
+(define (imrp ref-pts new-pts xt yt a rotation)
+  (define transformed-pts
+    (vector-map
+     (lambda (pt)
+       (cartesian->polar (cartesian-transform (polar->cartesian pt) xt yt a)))
+     new-pts))
+  (define matching-pts
+    (matching-points transformed-pts ref-pts rotation))
+  (optimal-transformation transformed-pts matching-pts))
+
+
 (provide
  matching-points
  matching-point
@@ -125,4 +147,6 @@
  interpolate-point-to-range
  interpolate-point-to-angle
 
- optimal-transformation)
+ optimal-transformation
+
+ imrp)
