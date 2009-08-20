@@ -67,19 +67,21 @@
 
   (test-case
    "Iterations of icp converge to true transform for an ellipse"
-   (define ref-pts (vector-map cartesian->polar (make-ellipse-points 5 5 3 2 .1 .1)))
-   (define new-pts (vector-map cartesian->polar (make-ellipse-points 6 6 3 2 .15 .1)))
-   (define-values (true-tx true-ty true-r) (values -1 -1 -.05))
-   (for/fold ([tx 0] [ty 0] [r 0])
-       ([i (in-range 10)])
-     (define-values (next-tx next-ty next-r)
-       (let-values (([ntx nty nr] (icp ref-pts new-pts tx ty r .2)))
-         (values (+ tx ntx) (+ ty nty) (+ r nr))))
-     (printf "Iteration ~a\n" i)
-     (check <
-            (cartesian-distance (make-cartesian next-tx next-ty) (make-cartesian true-tx true-ty))
-            (cartesian-distance (make-cartesian tx ty) (make-cartesian true-tx true-ty)))
-     (check < (abs (- next-r true-r)) (abs (- r true-r)))
-     (values next-tx next-ty next-r)))
+   (define ref-pts (vector-map cartesian->polar (make-ellipse-points 3 3 40 20 .10 .1)))
+   (define new-pts (vector-map cartesian->polar (make-ellipse-points 6 6 40 20 .15 .1)))
+   (define-values (true-tx true-ty true-r) (values -3 -3 -.05))
+   (define-values (tx ty r)
+     (for/fold ([tx 0] [ty 0] [r 0])
+         ([i (in-range 6)])
+       (define-values (next-tx next-ty next-r)
+         (let-values (([ntx nty nr] (icp ref-pts new-pts tx ty r .2)))
+           (values (+ tx ntx) (+ ty nty) (+ r nr))))
+       ;;(printf "Iteration ~a\n" i)
+       (check <
+              (cartesian-distance (make-cartesian next-tx next-ty) (make-cartesian true-tx true-ty))
+              (cartesian-distance (make-cartesian tx ty) (make-cartesian true-tx true-ty)))
+       (check < (abs (- next-r true-r)) (abs (- r true-r)))
+       (values next-tx next-ty next-r)))
+   #t)
             
   )
