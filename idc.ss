@@ -32,10 +32,10 @@
         (values xt yt a)
         (let-values (([d-xt d-yt d-a]
                       (idc-iteration ref-pts new-pts xt yt a rotation)))
-          (printf "IDC ~a ~a ~a\n" d-xt d-yt d-a)
+          (printf "IDC d-xt: ~a  d-yt: ~a d-a: ~a\n" d-xt d-yt d-a)
           (if (and (< (abs d-xt) threshold) (< (abs d-yt) threshold) (< (abs d-a) threshold))
               (values xt yt a)
-              (loop (sub1 i) (+ xt d-xt) (+ yt d-yt) (+ a d-a) (/ rotation 2)))))))
+              (loop (sub1 i) (+ xt d-xt) (+ yt d-yt) (+ a d-a) rotation))))))
   
 
 (define (idc-iteration ref-pts new-pts xt yt a rotation)
