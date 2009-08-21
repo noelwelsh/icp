@@ -11,7 +11,8 @@
          "geometry.ss"
          "point.ss"
          (prefix-in icp: "icp.ss")
-         (prefix-in imrp: "imrp.ss"))
+         (prefix-in imrp: "imrp.ss")
+         "idc.ss")
 
 ;; (U Cartesian Polar) -> Cartesian
 (define (point->cartesian pt)
@@ -103,3 +104,20 @@
   (slides frames #:title "ICP Slides"))
           
                
+(define (plot-idc)
+  (define ref-pts (vector-map cartesian->polar (make-ellipse-points 3 3 1000 500 .1 .1)))
+  (define new-pts (vector-map cartesian->polar (make-ellipse-points 6 6 1000 500 .3 .1)))
+  (define-values (true-xt true-yt true-a) (values -3 -3 -.2))
+  (define-values (xt yt a) (idc ref-pts new-pts 0 0 0 .1))
+
+  (plot-screen
+   "Ellipses"
+   (overlays
+    (list (colour (points->dots ref-pts) (vector-immutable 255 0 0))
+          (colour (points->dots new-pts) (vector-immutable 0 255 0))
+          (colour (points->dots
+                   (vector-map
+                    (lambda (pt)
+                      (cartesian->polar (cartesian-transform (polar->cartesian pt) xt yt a)))
+                    new-pts))
+                  (vector-immutable 0 0 255))))))

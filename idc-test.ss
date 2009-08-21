@@ -10,8 +10,7 @@
   (test-case
    "Iterations of IDC converge to true transform"
    (define ref-pts (vector-map cartesian->polar (make-ellipse-points 3 3 1000 500 .1 .1)))
-   (define new-pts (vector-map cartesian->polar (make-ellipse-points 6 6 1000 500 .3 .1
-)))
+   (define new-pts (vector-map cartesian->polar (make-ellipse-points 6 6 1000 500 .3 .1)))
    (define-values (true-xt true-yt true-a) (values -3 -3 -.2))
    (define-values (xt yt a) (idc ref-pts new-pts -3 -3 -.2 .1))
    (printf "IDC: ~a ~a ~a\n" xt yt a)
