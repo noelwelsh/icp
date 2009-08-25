@@ -23,6 +23,9 @@
 ;; The algorithm halts when all parameters of the
 ;; transformation change by less than threshold, or
 ;; iterations is exceeded.
+;;
+;; ref-pts should be projected to the same frame of
+;; reference as new-pts
 (define (idc ref-pts new-pts xt yt a rotation
              #:iterations [iterations 100]
              #:threshold [threshold .001])

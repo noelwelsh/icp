@@ -183,7 +183,7 @@
 ;; ... -> (values Number (Vector Number Number))
 ;;
 ;; Returns optimal rotation and transformation
-(define (optimal-transformation new-pts new-pose ref-pts ref-pose
+(define (optimal-transformation ref-pts ref-pose new-pts new-pose
                                 occlusion-angle
                                 neighbourhood angle-limit error-limit
                                 alpha Hd
@@ -204,6 +204,43 @@
       (optimise-translation new-pts new-norms matches normals rotation))
     (golden-section-search solve rotation-min rotation-max tolerance)))
 
+;; ... -> (values Number Number Number)
+;;
+;; Return optimal translation (x and y) and rotation
+;;
+;; Parameters:
+;;
+;; occlusion-angle: Radians; points less that this angle apart will occlude
+;;
+;; neighbourhood: Number of points used to construct tangent
+;;
+;; angle-limit: Radians; normal greater than this angle from
+;; a point will cause the tangent to be ignored
+;;
+;; error-limit: Max. allowed sum of squared error when
+;; fitting tangent line to points
+;;
+;; alpha:
+;; Hd:
+;;
+;; rotation-min: Radians; minimum value bounding angle we search in
+;;
+;; rotation-max: Radians; as above but the max value
+;;
+;; tolerance: Stopping condition for Golden Section search
+(define (slsma ref-pts ref-pose new-pts new-pose
+               occlusion-angle
+               neighbourhood angle-limit error-limit
+               alpha Hd
+               rotation-min rotation-max tolerance)
+  (define-values (t a)
+    (optimal-transformation ref-pts ref-pose new-pts new-pose
+                            occlusion-angle
+                            neighbourhood angle-limit error-limit
+                            alpha Hd
+                            rotation-min rotation-max tolerance))
+  (values (vector-ref t 0) (vector-ref t 1) a))
+
 
 (provide
  project-point
@@ -220,4 +257,5 @@
 
  golden-section-search
  
- optimal-transformation)
+ optimal-transformation
+ slsma)
