@@ -93,12 +93,18 @@
 ;; cluster Number -> cluster
 ;;
 ;; Posterior update for a cluster
-(define (cluster-update c error)
+(define (cluster-add c error)
   (match-define (struct cluster [a b]) c)
   (make-cluster (add1 a) (+ b error)))
+
+;; cluster Number -> cluster
+(define (cluster-remove c error)
+  (match-define (struct cluster [a b]) c)
+  (make-cluster (sub1 a) (- b error)))
 
 (provide
  (struct-out cluster)
  cluster-likelihood
- cluster-update
+ cluster-add
+ cluster-remove
  normalised-error)
