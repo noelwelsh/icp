@@ -30,12 +30,12 @@
              #:iterations [iterations 100]
              #:threshold [threshold .001])
   (let loop ([i iterations] [xt xt] [yt yt] [a a] [rotation rotation])
-    (printf "IDC iteration ~a: ~a ~a ~a ~a\n" i xt yt a rotation)
+    ;;(printf "IDC iteration ~a: ~a ~a ~a ~a\n" i xt yt a rotation)
     (if (zero? i)
         (values xt yt a)
         (let-values (([d-xt d-yt d-a]
                       (idc-iteration ref-pts new-pts xt yt a rotation)))
-          (printf "IDC d-xt: ~a  d-yt: ~a d-a: ~a\n" d-xt d-yt d-a)
+          ;;(printf "IDC d-xt: ~a  d-yt: ~a d-a: ~a\n" d-xt d-yt d-a)
           (if (and (< (abs d-xt) threshold) (< (abs d-yt) threshold) (< (abs d-a) threshold))
               (values xt yt a)
               (loop (sub1 i) (+ xt d-xt) (+ yt d-yt) (+ a d-a) rotation))))))

@@ -1,9 +1,5 @@
 #lang scheme/base
 
-(require
-  (prefix-in icp: "icp.ss")
-  (prefix-in imrp: "imrp.ss"))
-
 ;; This probability model converts a match into a
 ;; probability as follows:
 ;;
@@ -27,48 +23,14 @@
 ;; assumptions are realistic
 
 
-
-;; struct cluster : Number Number Number
-;;
-;; a is the alpha parameter of the gamma prior
-;; b is the beta parameter of the gamma prior
-(define-struct cluster (a b))
+(require
+ scheme/match
+ (planet williams/science:3/random-distributions/gaussian)
+ "error-cache.ss")
 
 
-
-;; (Vectorof Polar) (Vectorof Polar) Number Number Number -> Number
-;;
-;; Returns the sum of squared error of translated point
-;; matches to reference points using both ICP and IMRP
-;; normalised by the number of matching points
-;;
-;; ref-pts should be projected to the same frame of
-;; reference as new-pts
-(define (normalised-error ref-pts new-pts xt yt a)
-  (define transformed-pts
-    (vector-map
-     (lambda (pt)
-       (cartesian->polar (cartesian-transform (polar->cartesian pt) xt yt a)))
-     new-pts))
-  (define icp-matches
-    (idc:matching-points ref-pts transformed-pts rotation))
-  (define imrp-matches
-    (imrp:matching-points ref-pts transformed-pts rotation))
-  (define (error pt1 pt2)
-    (if (and pt1 pt2)
-        (values (cartesian-distance (polar->cartesian pt1) (polar->cartesian pt2)) 1)
-        (values 0 0)))
-  (define-values (err n)
-    (for/fold ([err 0] [n 0])
-        ([pt1 (in-vector transformed-pts)]
-         [pt2 (in-vector icp-matches)]
-         [pt3 (in-vector imrp-matches)])
-      (define-values (err1 n1)
-        (error pt1 pt2))
-      (define-values (err2 n2)
-        (error pt1 pt3))
-      (values (+ (* err1 err1) (* err2 err2) err) (+ n1 n2 n))))
-  (/ err n))
+;; struct cluster : (Listof Number) cache
+(define-struct cluster (idxs cache))
 
 
 ;; cluster Number -> Number
@@ -80,31 +42,68 @@
 ;; The integral, using Wolfram's integration tool, is:
 ;;
 ;; 1 \ gamma(lambda) [beta^alpha lambda^(alpha+1) gamma(alpha+1, lambda(beta + x)) ((beta + x) lambda)^(-alpha - 1)]
-(define (cluster-likelihood c error)
+'(define (cluster-likelihood c error)
   (match-define (struct cluster [a b]) c)
   (define l (/ a (* b b))) ;; Three times the variance. A hack
   (/ (* (expt b a)
         (expt l (add1 a))
-        (gamma-inc (add1 a) (* l (+ beta error)))
-        (expt (* l (+ b err)) (- (- a) l)))
+        (gamma-inc (add1 a) (* l (+ b error)))
+        (expt (* l (+ b error)) (- (- a) l)))
      (gamma a)))
+
+'(define (cluster-likelihood c error)
+  (match-define (struct cluster [a b]) c)
+  (define mean (/ a b))
+  (define var (/ a (* b b)))
+  (define step (/ (* 3 var) 10))
+  (define min (if (<= (- mean (* 3 var)) 0)
+                  (+ 0 step)
+                  (- mean (* 3 var))))
+  (define max (+ mean (* 3 var)))
+  (define-values (p n)
+    (for/fold ([p 0] [n 0])
+        ([precision (in-range min max step)])
+      ;;(printf "~a / ~a / ~a / ~a / ~a ~a ~a ~a\n" p n precision min max step a b)
+      (values
+       (+ (* (gaussian-pdf error 0 (/ 1 precision))
+             (gamma-pdf precision a b))
+          p)
+       (add1 n))))
+  (printf "error: ~a  a: ~a  b: ~a\n" error a b)
+  (printf "mean sigma: ~a  p(error|mean) ~a\n" (exact->inexact (/ mean)) (gaussian-pdf error 0 (/ mean)))
+  (printf "p(mean) ~a\n" (gamma-pdf mean a b))
+  (/ p n)
+  (gaussian-pdf error 0 (/ mean)))
+
+
+(define (cluster-likelihood c idx)
+  (match-define (struct cluster [idxs cache]) c)
+  (define-values (sum n)
+    (for/fold ([sum 0] [n 0])
+        ([i (in-list idxs)])
+      (values
+       (+ sum (cache-ref c idx i))
+       (add1 n))))
+  (gaussian-pdf (/ sum n) 0 (cache-std-dev c)))
 
 
 ;; cluster Number -> cluster
 ;;
 ;; Posterior update for a cluster
-(define (cluster-add c error)
-  (match-define (struct cluster [a b]) c)
-  (make-cluster (add1 a) (+ b error)))
+(define (cluster-add c idx)
+  (match-define (struct cluster [idxs cache]) c)
+  (if (memq idx idxs)
+      c
+      (make-cluster (cons idx idxs) c)))
 
 ;; cluster Number -> cluster
-(define (cluster-remove c error)
-  (match-define (struct cluster [a b]) c)
-  (make-cluster (sub1 a) (- b error)))
+(define (cluster-remove c idx)
+  (match-define (struct cluster [idxs cache]) c)
+  (make-cache (remq idx idxs) cache))
+
 
 (provide
  (struct-out cluster)
  cluster-likelihood
  cluster-add
- cluster-remove
- normalised-error)
+ cluster-remove)
