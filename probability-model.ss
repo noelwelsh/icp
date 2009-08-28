@@ -28,7 +28,7 @@
 
 
 ;; struct cluster : (Listof Number) cache
-(define-struct cluster (idxs cache))
+(define-struct cluster (idxs cache) #:transparent)
 
 
 ;; cache -> cluster
