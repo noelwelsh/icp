@@ -9,6 +9,7 @@
          "tangent-test.ss"
          "geometry-test.ss"
          "probability-model-test.ss"
+         "error-cache-test.ss"
          "util-test.ss")
 
 (define/provide-test-suite all-tests
@@ -19,5 +20,6 @@
   slsma-tests
   tangent-tests
   probability-model-tests
+  error-cache-tests
   geometry-tests
   util-tests)

@@ -37,8 +37,8 @@
       (define new-pose (vector-ref poses j))
       
       (define-values (xt yt a)
-        (scan-match ref-pts ref-pose new-pts new-pose rotation))
-      (define error (normalised-error ref-pts new-pts xt yt a))
+        (scan-match ref-pts ref-pose new-pts new-pose))
+      (define error (normalised-error ref-pts new-pts xt yt a rotation))
       (matrix-set! c i j error)
       (+ error sum)))
 

@@ -33,6 +33,10 @@
 (define-struct cluster (idxs cache))
 
 
+;; cache -> cluster
+(define (create-cluster cache)
+  (make-cluster null cache))
+
 ;; cluster Number -> Number
 ;;
 ;; Likelihood of a number (error) under the
@@ -42,38 +46,7 @@
 ;; The integral, using Wolfram's integration tool, is:
 ;;
 ;; 1 \ gamma(lambda) [beta^alpha lambda^(alpha+1) gamma(alpha+1, lambda(beta + x)) ((beta + x) lambda)^(-alpha - 1)]
-'(define (cluster-likelihood c error)
-  (match-define (struct cluster [a b]) c)
-  (define l (/ a (* b b))) ;; Three times the variance. A hack
-  (/ (* (expt b a)
-        (expt l (add1 a))
-        (gamma-inc (add1 a) (* l (+ b error)))
-        (expt (* l (+ b error)) (- (- a) l)))
-     (gamma a)))
 
-'(define (cluster-likelihood c error)
-  (match-define (struct cluster [a b]) c)
-  (define mean (/ a b))
-  (define var (/ a (* b b)))
-  (define step (/ (* 3 var) 10))
-  (define min (if (<= (- mean (* 3 var)) 0)
-                  (+ 0 step)
-                  (- mean (* 3 var))))
-  (define max (+ mean (* 3 var)))
-  (define-values (p n)
-    (for/fold ([p 0] [n 0])
-        ([precision (in-range min max step)])
-      ;;(printf "~a / ~a / ~a / ~a / ~a ~a ~a ~a\n" p n precision min max step a b)
-      (values
-       (+ (* (gaussian-pdf error 0 (/ 1 precision))
-             (gamma-pdf precision a b))
-          p)
-       (add1 n))))
-  (printf "error: ~a  a: ~a  b: ~a\n" error a b)
-  (printf "mean sigma: ~a  p(error|mean) ~a\n" (exact->inexact (/ mean)) (gaussian-pdf error 0 (/ mean)))
-  (printf "p(mean) ~a\n" (gamma-pdf mean a b))
-  (/ p n)
-  (gaussian-pdf error 0 (/ mean)))
 
 
 (define (cluster-likelihood c idx)
@@ -82,9 +55,12 @@
     (for/fold ([sum 0] [n 0])
         ([i (in-list idxs)])
       (values
-       (+ sum (cache-ref c idx i))
+       (+ sum (cache-ref cache idx i))
        (add1 n))))
-  (gaussian-pdf (/ sum n) 0 (cache-std-dev c)))
+
+  (if (zero? n)
+      (gaussian-pdf (cache-std-dev cache) 0 (cache-std-dev cache)) 
+      (gaussian-pdf (/ sum n) 0 (cache-std-dev cache))))
 
 
 ;; cluster Number -> cluster
@@ -94,16 +70,17 @@
   (match-define (struct cluster [idxs cache]) c)
   (if (memq idx idxs)
       c
-      (make-cluster (cons idx idxs) c)))
+      (make-cluster (cons idx idxs) cache)))
 
 ;; cluster Number -> cluster
 (define (cluster-remove c idx)
   (match-define (struct cluster [idxs cache]) c)
-  (make-cache (remq idx idxs) cache))
+  (make-cluster (remq idx idxs) cache))
 
 
 (provide
  (struct-out cluster)
+ create-cluster
  cluster-likelihood
  cluster-add
  cluster-remove)

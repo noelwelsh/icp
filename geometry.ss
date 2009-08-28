@@ -97,7 +97,7 @@
              (matrix 2 2
                      (cartesian-x new-x) (cartesian-x new-y)
                      (cartesian-y new-x) (cartesian-y new-y))))
-  
+
   (for/vector ([i (vector-length pts)]
                [pt (in-vector pts)])
               (define world-pt (cartesian+ (polar->cartesian (polar-rotate pt r-a))

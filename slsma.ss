@@ -233,7 +233,7 @@
                neighbourhood angle-limit error-limit
                alpha Hd
                rotation-min rotation-max tolerance)
-  (define-values (t a)
+  (define-values (a t)
     (optimal-transformation ref-pts ref-pose new-pts new-pose
                             occlusion-angle
                             neighbourhood angle-limit error-limit
