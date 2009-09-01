@@ -28,25 +28,61 @@
   ;; section, as it is unlikely that the scan matching is
   ;; symmetric.
   (define total-error
-    (for*/fold ([sum 0])
+    (begin
+      (printf "Building error cache\n")
+      (for*/fold ([sum 0])
                ([i (in-range l)]
                 [j (in-range l)])
       (define ref-pts (vector-ref scans i))
       (define new-pts (vector-ref scans j))
       (define ref-pose (vector-ref poses i))
       (define new-pose (vector-ref poses j))
-      
-      (define-values (xt yt a)
-        (scan-match ref-pts ref-pose new-pts new-pose))
-      (define error (normalised-error ref-pts new-pts xt yt a rotation))
-      (matrix-set! c i j error)
-      (+ error sum)))
 
+      (printf "Iteration ~a ~a\n" i j)
+      (if (= i j)
+          (begin
+            (matrix-set! c i j 0)
+            sum)
+          (let*-values (([xt yt a]
+                         (scan-match ref-pts ref-pose new-pts new-pose))
+                        ([error]
+                         (normalised-error ref-pts new-pts xt yt a rotation)))
+            (matrix-set! c i j error)
+            (+ error sum))))))
+
+  (when (zero? l)
+    (raise-mismatch-error
+     'create-cache "Cannot create error cache with zero scans:" scans))
   (make-cache c (/ total-error (* l l))))
 
 (define (cache-ref c ref-idx new-idx)
   (matrix-ref (cache-errors c) ref-idx new-idx))
 
+
+(define (write-cache cache file-name)
+  (with-output-to-file file-name
+    (lambda ()
+      (define e (cache-errors cache))
+      (define r (matrix-rows e))
+      (define c (matrix-rows e))
+      (printf "~a ~a\n" r c)
+      (printf "~a\n" (cache-std-dev cache))
+      (for* ([i (in-range r)]
+             [j (in-range c)])
+            (display (matrix-ref e i j)) (display " ")))
+    #:exists 'replace))
+
+(define (read-cache file-name)
+  (with-input-from-file file-name
+    (lambda ()
+      (define r (read))
+      (define c (read))
+      (define std-dev (read))
+      (define e (make-matrix r c))
+      (for* ([i (in-range r)]
+             [j (in-range c)])
+            (matrix-set! e i j (read)))
+      (make-cache e std-dev))))
 
 
 ;; Utilities
@@ -84,10 +120,16 @@
       (define-values (err2 n2)
         (error pt1 pt3))
       (values (+ (* err1 err1) (* err2 err2) err) (+ n1 n2 n))))
-  (/ err n))
+  (if (zero? n)
+      ;; A very big error
+      (* 1000 (vector-length transformed-pts))
+      (/ err n)))
 
 
 (provide
  (struct-out cache)
  create-cache
- cache-ref)
+ cache-ref
+
+ write-cache
+ read-cache)

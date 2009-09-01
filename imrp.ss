@@ -96,36 +96,42 @@
 ;; (Vectorof Polar) (Vectorof Polar) -> (values Number Number Number)
 (define (optimal-transformation ref-pts match-pts)
   (define n-actual-matches (for/sum ([x (in-vector match-pts)]) (if x 1 0)))
-  (define-values (scan-pts matching-pts)
-    (for/vector ([i n-actual-matches 2]
-                 [p (in-vector ref-pts)]
-                 [m (in-vector match-pts)]
-                 #:when m)
-      (values p m)))
 
-  (define s-pts (vector-map polar->cartesian scan-pts))
-  (define m-pts (vector-map polar->cartesian matching-pts))
+  (if (zero? n-actual-matches)
+      (begin
+        (display "IMRP: No matching points. Returning no transformation.\n")
+        (values 0 0 0))
+      (let ()
+        (define-values (scan-pts matching-pts)
+          (for/vector ([i n-actual-matches 2]
+                       [p (in-vector ref-pts)]
+                       [m (in-vector match-pts)]
+                       #:when m)
+                      (values p m)))
 
-  (define s-xs (vector-map cartesian-x s-pts))
-  (define m-xs (vector-map cartesian-x m-pts))
-  (define s-ys (vector-map cartesian-y s-pts))
-  (define m-ys (vector-map cartesian-y m-pts))
+        (define s-pts (vector-map polar->cartesian scan-pts))
+        (define m-pts (vector-map polar->cartesian matching-pts))
+
+        (define s-xs (vector-map cartesian-x s-pts))
+        (define m-xs (vector-map cartesian-x m-pts))
+        (define s-ys (vector-map cartesian-y s-pts))
+        (define m-ys (vector-map cartesian-y m-pts))
   
-  (define s-x-mean (mean s-xs))
-  (define m-x-mean (mean m-xs))
-  (define s-y-mean (mean s-ys))
-  (define m-y-mean (mean m-ys))
+        (define s-x-mean (mean s-xs))
+        (define m-x-mean (mean m-xs))
+        (define s-y-mean (mean s-ys))
+        (define m-y-mean (mean m-ys))
 
-  (define Sxx (sse s-xs m-xs))
-  (define Syy (sse s-ys m-ys))
-  (define Sxy (sse s-xs m-ys))
-  (define Syx (sse s-ys m-xs))
+        (define Sxx (sse s-xs m-xs))
+        (define Syy (sse s-ys m-ys))
+        (define Sxy (sse s-xs m-ys))
+        (define Syx (sse s-ys m-xs))
 
-  (define angle (atan (/ (- Sxy Syx) (+ Sxx Syy))))
-  (define t-x (- m-x-mean (* s-x-mean (cos angle)) (* s-y-mean (sin angle))))
-  (define t-y (- m-y-mean (* s-x-mean (sin angle)) (* s-y-mean (cos angle))))
+        (define angle (atan (/ (- Sxy Syx) (+ Sxx Syy))))
+        (define t-x (- m-x-mean (* s-x-mean (cos angle)) (* s-y-mean (sin angle))))
+        (define t-y (- m-y-mean (* s-x-mean (sin angle)) (* s-y-mean (cos angle))))
 
-  (values t-x t-y angle))
+        (values t-x t-y angle))))
 
 ;; (Vectorof Polar) (Vectorof Polar) Number Number Number Number
 ;;   ->
