@@ -6,9 +6,9 @@
          (planet schematics/schemeunit:3))
 
 ;; struct polar : number number
-(define-struct polar (r a) #:transparent)
+(define-struct polar (r a) #:prefab)
 ;; struct cartesian : number number
-(define-struct cartesian (x y) #:transparent)
+(define-struct cartesian (x y) #:prefab)
 
 
 (define (polar->cartesian p)

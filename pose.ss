@@ -7,7 +7,7 @@
 ;; struct pose : Number Number Number
 ;;
 ;; Pose in 2-D: x, y, and angle
-(define-struct pose (x y a) #:transparent)
+(define-struct pose (x y a) #:prefab)
 
 ;; Pose (Vectorof Polar) -> (Vectorof Polar)
 (define (pose-transform-points pose points)
