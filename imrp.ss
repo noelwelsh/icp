@@ -97,9 +97,9 @@
 (define (optimal-transformation ref-pts match-pts)
   (define n-actual-matches (for/sum ([x (in-vector match-pts)]) (if x 1 0)))
 
-  (if (zero? n-actual-matches)
+  (if (or (zero? n-actual-matches) (= 1 n-actual-matches))
       (begin
-        (display "IMRP: No matching points. Returning no transformation.\n")
+        (display "IMRP: Zero or one matching points. Returning no transformation.\n")
         (values 0 0 0))
       (let ()
         (define-values (scan-pts matching-pts)

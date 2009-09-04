@@ -11,6 +11,7 @@
  (planet schematics/numeric:1/vector)
  (planet schematics/numeric:1/matrix)
  "scan-match.ss"
+ "geometry.ss"
  "point.ss"
  (prefix-in icp: "icp.ss")
  (prefix-in imrp: "imrp.ss"))
@@ -46,7 +47,8 @@
           (let*-values (([xt yt a]
                          (scan-match ref-pts ref-pose new-pts new-pose))
                         ([error]
-                         (normalised-error ref-pts new-pts xt yt a rotation)))
+                         (let ([proj-pts (project-points ref-pts ref-pose new-pose)])
+                           (normalised-error proj-pts new-pts xt yt a rotation))))
             (matrix-set! c i j error)
             (+ error sum))))))
 
@@ -108,22 +110,17 @@
     (imrp:matching-points ref-pts transformed-pts rotation))
   (define (error pt1 pt2)
     (if (and pt1 pt2)
-        (values (cartesian-distance (polar->cartesian pt1) (polar->cartesian pt2)) 1)
-        (values 0 0)))
-  (define-values (err n)
-    (for/fold ([err 0] [n 0])
+        (cartesian-distance (polar->cartesian pt1) (polar->cartesian pt2))
+        100))
+  (define err
+    (for/fold ([err 0])
         ([pt1 (in-vector transformed-pts)]
          [pt2 (in-vector icp-matches)]
          [pt3 (in-vector imrp-matches)])
-      (define-values (err1 n1)
-        (error pt1 pt2))
-      (define-values (err2 n2)
-        (error pt1 pt3))
-      (values (+ (* err1 err1) (* err2 err2) err) (+ n1 n2 n))))
-  (if (zero? n)
-      ;; A very big error
-      (* 1000 (vector-length transformed-pts))
-      (/ err n)))
+      (define err1 (error pt1 pt2))
+      (define err2 (error pt1 pt3))
+      (+ (* err1 err1) (* err2 err2) err)))
+  (/ err (* 2 (vector-length transformed-pts))))
 
 
 (provide
@@ -132,4 +129,6 @@
  cache-ref
 
  write-cache
- read-cache)
+ read-cache
+
+ normalised-error)
