@@ -93,6 +93,13 @@
 
   (make-polar r (+ a theta)))
 
+(define (polar-normalise p)
+  (match-define (struct polar (r a)) p)
+
+  (if (< a 0)
+      (make-polar r (+ a (* 2 pi)))
+      p))
+
 
 
 (define-check (check-point p1 p2 e)
@@ -134,5 +141,6 @@
  polar-
  polar-dot
  polar-rotate
+ polar-normalise
 
  check-point)

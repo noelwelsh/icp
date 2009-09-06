@@ -34,10 +34,18 @@
                                   neighbourhood angle-limit error-limit
                                   alpha Hd
                                   rotation-min rotation-max tolerance))
+  ;;(printf "scan-match slsma: ~a ~a ~a\n" xt yt a)
   (idc proj-pts new-pts xt yt a rotation))
 
+;; (Vectorof Polar) Pose (Vectorof Polar) Pose -> (values Number Number Number)
+;;
+;; Scan matching using just IDC
+(define (scan-match/idc ref-pts ref-pose new-pts new-pose)
+  (define proj-pts (project-points ref-pts ref-pose new-pose))
+  (idc proj-pts new-pts 0 0 0 rotation))
 
 
 (provide
  scan-match
+ scan-match/idc
  rotation)

@@ -57,6 +57,8 @@
 ;; Polar Pose Pose -> Polar
 ;;
 ;; Project from ref-pose to new-pose
+;;
+;; Note angles are normalised to be between 0 and 2pi
 (define (project-point pt ref-pose new-pose)
   (match-define (struct pose [r-x r-y r-a]) ref-pose)
   (match-define (struct pose [n-x n-y n-a]) new-pose)
@@ -87,6 +89,8 @@
 ;; (Vectorof Polar) Pose Pose -> (Vectorof Polar)
 ;;
 ;; Project from ref-pose to new-pose
+;;
+;; Note angles are normalised to be between 0 and 2pi
 (define (project-points pts ref-pose new-pose)
   ;; This is faster than calling project-point for every point
   (match-define (struct pose [r-x r-y r-a]) ref-pose)
