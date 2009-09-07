@@ -4,6 +4,7 @@
          (planet schematics/numeric:1/vector)
          (planet schematics/numeric:1/for)
          (planet williams/science:3/statistics)
+         "angle.ss"
          "point.ss"
          "util.ss")
 
@@ -18,8 +19,8 @@
 ;; pts must be sorted by angle from low to high
 (define (matching-point p pts rotation)
   (match-define (struct polar (r a)) p)
-  (define low (- a rotation))
-  (define high (+ a rotation))
+  (define low (angle-normalise (- a rotation)))
+  (define high (angle-normalise (+ a rotation)))
 
   (for/fold ([found #f])
       ([p1 (in-vector pts)]
@@ -27,15 +28,16 @@
     (match-define (struct polar (r1 a1)) p1)
     (match-define (struct polar (r2 a2)) p2)
 
+    ;;(printf "low ~a  high ~a  a1 ~a  a2 ~a\n" low high a1 a2)
     (if (or
-         (and (< a1 low) (< a2 low))
-         (and (> a1 high) (> a2 high)))
+         (and (angle<? a1 low) (angle<? a2 low))
+         (and (angle<? high a1) (angle<? high a2)))
         ;; Current points don't overlap allowable range
         found
-        (let* ([low-p (if (< a1 low)
+        (let* ([low-p (if (angle<? a1 low)
                           (interpolate-point-to-angle p1 p2 low)
                           p1)]
-               [high-p (if (< high a2)
+               [high-p (if (angle<? high a2)
                            (interpolate-point-to-angle p1 p2 high)
                            p2)]
                [closest (closest-point p low-p high-p)])
@@ -78,8 +80,8 @@
   (match-define (struct polar (r2 a2)) p2)
 
   (define r
-    (/ (* r1 r2 (- a2 a1))
-       (+ (* r1 (- a a1)) (* r2 (- a2 a)))))
+    (/ (* r1 r2 (angle-normalise (- a2 a1)))
+       (+ (* r1 (angle-normalise (- a a1))) (* r2 (angle-normalise (- a2 a))))))
   (make-polar r a))
 
 (define (interpolate-point-to-range p1 p2 r)
@@ -87,9 +89,10 @@
   (match-define (struct polar (r2 a2)) p2)
 
   (define a
-    (* (/ (- r1 r2))
-       (+ (/ (* r1 r2 (- a2 a1)) r)
-          (- (* r1 a1) (* r2 a2)))))
+    (angle-normalise
+     (* (/ (- r1 r2))
+        (+ (/ (* r1 r2 (angle-normalise (- a2 a1))) r)
+           (- (* r1 a1) (* r2 a2))))))
   (make-polar r a))
 
 
@@ -148,7 +151,7 @@
   (define transformed-pts
     (vector-map
      (lambda (pt)
-       (cartesian->polar (cartesian-transform (polar->cartesian pt) xt yt a)))
+       (polar-normalise (cartesian->polar (cartesian-transform (polar->cartesian pt) xt yt a))))
      new-pts))
   (define matching-pts
     (matching-points transformed-pts ref-pts rotation))

@@ -20,7 +20,7 @@
 ;; #t if a1 is within e radians of a2
 ;;
 ;; a1 and a2 MUST be normalised
-(define (angle-= a1 a2 [e 0])
+(define (angle=? a1 a2 [e 0])
   (if (zero? e)
       (= a1 a2)
       (let ([low (angle-normalise (- a2 e))]
@@ -34,7 +34,16 @@
             (or (<= low a1 2pi)
                 (<= 0 a1 high))))))
 
+;; Number Number -> (U #t #f)
+;;
+;; True if the shortest rotation from a1 to a2 is in the
+;; anticlockwise direction
+;;
+;; a1 and a2 should be normalised
+(define (angle<? a1 a2)
+  (< (angle-normalise (- a2 a1)) pi))
 
 (provide
  angle-normalise
- angle-=)
+ angle=?
+ angle<?)

@@ -3,7 +3,8 @@
 (require scheme/math
          scheme/match
          (planet schematics/numeric:1/vector)
-         (planet schematics/schemeunit:3))
+         (planet schematics/schemeunit:3)
+         "angle.ss")
 
 ;; struct polar : number number
 (define-struct polar (r a) #:prefab)
@@ -95,11 +96,7 @@
 
 (define (polar-normalise p)
   (match-define (struct polar (r a)) p)
-
-  (if (< a 0)
-      (make-polar r (+ a (* 2 pi)))
-      p))
-
+  (make-polar r (angle-normalise a)))
 
 
 (define-check (check-point p1 p2 e)

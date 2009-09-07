@@ -7,6 +7,8 @@
          "point.ss"
          "geometry.ss")
 
+(define e 0.00001)
+
 (define/provide-test-suite imrp-tests
   (test-case
    "interpolate-point-to-angle"
@@ -52,17 +54,34 @@
   (test-case
    "matching-point"
    (define p (make-polar 3 0))
-   (define pts (vector (make-polar 3 3) (make-polar 4 1) (make-polar 2 -1) (make-polar 3 -3)))
-   (check-equal? (matching-point p pts 1)
-                 (make-polar 3 1/3)))
+   (define pts
+     (vector-map
+      polar-normalise
+      (vector (make-polar 3 -3) (make-polar 2 -1) (make-polar 4 1) (make-polar 3 3))))
+   (check-point (matching-point p pts 1) (make-polar 3 1/3) e))
 
   (test-case
    "matching-points returns matchs in correct order"
    (define pts1 (vector (make-polar 2 3) (make-polar 4 2) (make-polar 3 1)))
    (define pts2 (vector (make-polar 2 3) (make-polar 4 2) (make-polar 3 1)))
-   (check-equal? (matching-points pts1 pts2 1)
-                 pts2))
+   (vector-map
+    (lambda (p1 p2) (check-point p1 p2 e))
+    (matching-points pts1 pts2 1)
+    pts2))
 
+  (test-case
+   "matching-points finds exact matches for duplicated points"
+   (define pts
+     #(#s(polar 12.659980129625007 6.169738940534455)
+       #s(polar 12.659984467529965 6.1871918601262275)
+       #s(polar 12.760034866316001 6.204645553498888)
+       #s(polar 15.460035923506128 6.222098952775416)
+       #s(polar 18.010041482523718 6.23955218569482)))
+   (vector-map
+    (lambda (pt1 pt2) (check-point pt1 pt2 e))
+    (matching-points pts pts e)
+    pts))
+  
   (test-case
    "optimal-transformation finds correct rotation"
    ;; Points on a square (or, a circle!)
@@ -73,7 +92,7 @@
                             (make-polar 3 (+ pi .2)) (make-polar 3 (+ (* pi 3/2) .2))))
    (define-values (tx ty a)
      (optimal-transformation scan-pts matching-pts))
-   (check-= a 0.2 0.00001))
+   (check-= a 0.2 e))
 
   (test-case
    "optimal-transformation finds correct translation"
@@ -87,8 +106,8 @@
                                  (make-cartesian -2.9 .1) (make-cartesian .1 -2.9))))
    (define-values (tx ty a)
      (optimal-transformation scan-pts matching-pts))
-   (check-= tx 0.1 0.00001)
-   (check-= ty 0.1 0.00001))
+   (check-= tx 0.1 e)
+   (check-= ty 0.1 e))
 
   (test-case
    "Iterations of imrp converge to true transform for an ellipse"

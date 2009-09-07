@@ -6,7 +6,8 @@
          (planet williams/science:3/statistics)
          "point.ss"
          "geometry.ss"
-         "util.ss")
+         "util.ss"
+         "angle.ss")
 
 ;; (Vectorof Polar) (Vectorof Polar) Number -> (Vectorof (U Polar #f))
 (define (matching-points scan-pts model-pts rotation)
@@ -19,8 +20,8 @@
 ;; pts must be sorted by angle from low to high
 (define (matching-point p pts rotation)
   (match-define (struct polar (r a)) p)
-  (define low (- a rotation))
-  (define high (+ a rotation))
+  (define low (angle-normalise (- a rotation)))
+  (define high (angle-normalise (+ a rotation)))
 
   (define-values (found found-dist)
     (for/fold ([found #f] [found-dist #f])
@@ -30,14 +31,14 @@
       (match-define (struct polar (r2 a2)) p2)
       
       (if (or
-           (and (< a1 low) (< a2 low))
-           (and (> a1 high) (> a2 high)))
+           (and (angle<? a1 low) (angle<? a2 low))
+           (and (angle<? high a1) (angle<? high a2)))
           ;; Current points don't overlap allowable range
           (values found found-dist)
-          (let* ([low-p (if (< a1 low)
+          (let* ([low-p (if (angle<? a1 low)
                             (interpolate-point-to-angle p1 p2 low)
                             p1)]
-                 [high-p (if (< high a2)
+                 [high-p (if (angle<? high a2)
                              (interpolate-point-to-angle p1 p2 high)
                              p2)])
             (let-values (([closest closest-dist] (closest-point p low-p high-p)))
@@ -56,14 +57,15 @@
   (define-values (closest-pt dist)
     (line-segment-closest-point (polar->cartesian p1) (polar->cartesian p2)
                                 (polar->cartesian p)))
-  (values (cartesian->polar closest-pt) dist))
+  (values (polar-normalise (cartesian->polar closest-pt)) dist))
 
 ;; Polar Polar Number -> Polar
 (define (interpolate-point-to-angle p1 p2 a)
-  (cartesian->polar
-   (line-line-intersection
-    (polar->cartesian p1) (polar->cartesian p2)
-    (polar->cartesian (make-polar 1 a)) (make-cartesian 0 0))))
+  (polar-normalise
+   (cartesian->polar
+    (line-line-intersection
+     (polar->cartesian p1) (polar->cartesian p2)
+     (polar->cartesian (make-polar 1 a)) (make-cartesian 0 0)))))
 
 
 (define (interpolate-point-to-range p1 p2 r)
@@ -71,9 +73,10 @@
   (match-define (struct polar (r2 a2)) p2)
 
   (define a
-    (* (/ (- r1 r2))
-       (+ (/ (* r1 r2 (- a2 a1)) r)
-          (- (* r1 a1) (* r2 a2)))))
+    (angle-normalise
+     (* (/ (- r1 r2))
+        (+ (/ (* r1 r2 (angle-normalise (- a2 a1))) r)
+           (- (* r1 a1) (* r2 a2))))))
   (make-polar r a))
 
 

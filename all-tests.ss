@@ -10,7 +10,8 @@
          "geometry-test.ss"
          "probability-model-test.ss"
          "error-cache-test.ss"
-         "util-test.ss")
+         "util-test.ss"
+         "angle-test.ss")
 
 (define/provide-test-suite all-tests
   imrp-tests
@@ -22,4 +23,5 @@
   probability-model-tests
   error-cache-tests
   geometry-tests
-  util-tests)
+  util-tests
+  angle-tests)
