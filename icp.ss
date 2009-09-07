@@ -86,7 +86,7 @@
 
   (if (or (zero? n-actual-matches) (= 1 n-actual-matches))
       (begin
-        (display "IDC: Zero or one matching points. Returning no transformation.\n")
+        (display "ICP: Zero or one matching points. Returning no transformation.\n")
         (values 0 0 0))
       (let ()
         (define-values (scan-pts matching-pts)
