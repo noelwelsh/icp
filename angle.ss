@@ -11,8 +11,10 @@
 (define (angle-normalise a)
   (cond
    [(and (<= 0 a) (< a 2pi)) a]
-   [(< a 0) (angle-normalise (+ 2pi a))]
-   [(<= 2pi a) (angle-normalise (- a 2pi))]
+   [(< a 0)
+    (angle-normalise (- a (* (floor (/ a 2pi)) 2pi)))]
+   [(<= 2pi a)
+    (angle-normalise (- a (* (ceiling (/ a 2pi)) 2pi)))]
    [else (error 'angle-normalise "impossible condition for angle ~a\n" a)]))
 
 

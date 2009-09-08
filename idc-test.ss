@@ -26,11 +26,12 @@
   (test-case
    "idc aligns identical points without any transformation"
    (for ([pts (in-vector points)]
-         [pose (in-vector poses)])
+         [pose (in-vector poses)]
+         [i (in-naturals)])
         (define ref-pts (project-points pts pose pose))
         (define new-pts pts)
         (define-values (xt yt a) (idc ref-pts new-pts 0 0 0 .2))
-        (printf "IDC: ~a ~a ~a\n" xt yt a)
+        (printf "IDC ~a: ~a ~a ~a\n" i xt yt a)
         (check-= xt 0 0.1)
         (check-= yt 0 0.1)
         (check-= a  0 0.1)))
