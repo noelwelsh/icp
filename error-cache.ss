@@ -44,11 +44,7 @@
           (begin
             (matrix-set! c i j 0)
             sum)
-          (let*-values (([xt yt a]
-                         (scan-match ref-pts ref-pose new-pts new-pose))
-                        ([error]
-                         (let ([proj-pts (project-points ref-pts ref-pose new-pose)])
-                           (normalised-error proj-pts new-pts xt yt a rotation))))
+          (let ([error (scan-match-error ref-pts ref-pose new-pts new-pose)])
             (matrix-set! c i j error)
             (+ error sum))))))
 
@@ -123,6 +119,14 @@
   (/ err (* 2 (vector-length transformed-pts))))
 
 
+(define (scan-match-error ref-pts ref-pose new-pts new-pose)
+  (define-values (xt yt a)
+    (scan-match ref-pts ref-pose new-pts new-pose))
+  (define error
+    (let ([proj-pts (project-points ref-pts ref-pose new-pose)])
+      (normalised-error proj-pts new-pts xt yt a rotation)))
+  error)
+
 (provide
  (struct-out cache)
  create-cache
@@ -131,4 +135,5 @@
  write-cache
  read-cache
 
- normalised-error)
+ normalised-error
+ scan-match-error)
