@@ -86,6 +86,6 @@
    (define proj-pts (project-points pts ref-pose new-pose))
    (for ([pt (in-vector pts)]
          [actual (in-vector proj-pts)])
-        (check-equal? actual (project-point pt ref-pose new-pose))))
+        (check-point actual (project-point pt ref-pose new-pose) e)))
   
   )

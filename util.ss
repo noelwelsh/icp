@@ -1,6 +1,19 @@
 #lang scheme/base
 
-;; Number -> Number
+(require
+ scheme/foreign
+ "c/base.ss")
+
+
+(define-icp (sse1
+             "sse1"
+             (err : (_vector i _double)) (_int = (vector-length err)) -> _double))
+
+(define-icp (sse2
+             "sse"
+             (err1 : (_vector i _double)) (_vector i _double) (_int = (vector-length err1)) -> _double))
+  
+
 (define (square x) (* x x))
 
 ;; (Vectorof Number) -> Number
@@ -18,27 +31,8 @@
 ;;   sum(xy) - mean(X)sum(y) - mean(y)sum(x) + N mean(X)mean(Y)
 (define sse
   (case-lambda
-    [(data)
-     (define n (vector-length data))
-     (define-values (squares sum)
-       (for/fold ([squares 0] [sum 0])
-           ([x (in-vector data)])
-         (values (+ squares (* x x))
-                 (+ sum x))))
-     (- squares (/ (* sum sum) n))]
-    [(data1 data2)
-     (define n (vector-length data1))
-     (define-values (sum-xy sum-x sum-y)
-       (for/fold ([sum-xy 0] [sum-x 0] [sum-y 0])
-           ([x (in-vector data1)]
-            [y (in-vector data2)])
-         (values (+ sum-xy (* x y))
-                 (+ sum-x x)
-                 (+ sum-y y))))
-     (define mean-x (/ sum-x n))
-     (define mean-y (/ sum-y n))
-
-     (+ sum-xy (- (* mean-x sum-y)) (- (* mean-y sum-x)) (* n mean-x mean-y))]))
+    [(data) (sse1 data)]
+    [(data1 data2) (sse2 data1 data2)]))
 
 (provide
  square

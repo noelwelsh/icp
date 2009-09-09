@@ -60,8 +60,8 @@
 ;;
 ;; Note angles are normalised to be between 0 and 2pi
 (define (project-point pt ref-pose new-pose)
-  (match-define (struct pose [r-x r-y r-a]) ref-pose)
-  (match-define (struct pose [n-x n-y n-a]) new-pose)
+  (match-define (pose [r-x r-y r-a]) ref-pose)
+  (match-define (pose [n-x n-y n-a]) new-pose)
   ;; Point in world coordinates
   (define world-pt
     (cartesian+ (polar->cartesian (polar-rotate pt r-a))
@@ -93,8 +93,8 @@
 ;; Note angles are normalised to be between 0 and 2pi
 (define (project-points pts ref-pose new-pose)
   ;; This is faster than calling project-point for every point
-  (match-define (struct pose [r-x r-y r-a]) ref-pose)
-  (match-define (struct pose [n-x n-y n-a]) new-pose)
+  (match-define (pose [r-x r-y r-a]) ref-pose)
+  (match-define (pose [n-x n-y n-a]) new-pose)
   (define new-x (polar->cartesian (make-polar 1 n-a)))
   (define new-y (polar->cartesian (polar-rotate (make-polar 1 n-a) (/ pi 2))))
   (define t (matrix-invert
