@@ -16,12 +16,12 @@
 (define/provide-test-suite all-tests
   imrp-tests
   icp-tests
-  idc-tests
   point-tests
   slsma-tests
   tangent-tests
   probability-model-tests
-  error-cache-tests
   geometry-tests
   util-tests
-  angle-tests)
+  angle-tests
+  idc-tests
+  error-cache-tests)

@@ -2,56 +2,66 @@
 
 (require scheme/match
          scheme/math
+         scheme/foreign
          (planet schematics/numeric:1/matrix)
          (planet schematics/numeric:1/vector)
          "point.ss"
          "pose.ss"
-         "util.ss")
+         "util.ss"
+         "c/base.ss")
 
 ;; Cartesian Cartesian Cartesian -> (values Cartesian Number)
-(define (line-segment-closest-point pt1 pt2 pt)
-  (if (cartesian=? pt1 pt2)
-      (values pt1 (cartesian-distance pt1 pt))
-      (let ()
-        (match-define (cartesian [x1 y1]) pt1)
-        (match-define (cartesian [x2 y2]) pt2)
-        (match-define (cartesian [x y]) pt)
+(define-icp (line-segment-closest-point
+             "line_segment_closest_point"
+             _cartesian _cartesian _cartesian (out : (_ptr o _cartesian))
+             -> (dist : _double)
+             -> (values out dist)))
+;;   (if (cartesian=? pt1 pt2)
+;;       (values pt1 (cartesian-distance pt1 pt))
+;;       (let ()
+;;         (match-define (cartesian [x1 y1]) pt1)
+;;         (match-define (cartesian [x2 y2]) pt2)
+;;         (match-define (cartesian [x y]) pt)
 
-        (define u
-          (/ (+ (* (- x x1) (- x2 x1))
-                (* (- y y1) (- y2 y1)))
-             (square (cartesian-distance pt2 pt1))))
-        (define closest-pt
-          (cond
-           [(<= u 0) pt1]
-           [(<= 1 u) pt2]
-           [else (make-cartesian (+ x1 (* u (- x2 x1)))
-                                 (+ y1 (* u (- y2 y1))))]))
-        (define dist
-          (cartesian-distance closest-pt pt))
-        (values closest-pt dist))))
+;;         (define u
+;;           (/ (+ (* (- x x1) (- x2 x1))
+;;                 (* (- y y1) (- y2 y1)))
+;;              (square (cartesian-distance pt2 pt1))))
+;;         (define closest-pt
+;;           (cond
+;;            [(<= u 0) pt1]
+;;            [(<= 1 u) pt2]
+;;            [else (make-cartesian (+ x1 (* u (- x2 x1)))
+;;                                  (+ y1 (* u (- y2 y1))))]))
+;;         (define dist
+;;           (cartesian-distance closest-pt pt))
+;;         (values closest-pt dist))))
 
 ;; Cartesian Cartesian Cartesian Cartesian -> Cartesian
-(define (line-line-intersection pt1 pt2 pt3 pt4)
-  (match-define (cartesian [x1 y1]) pt1)
-  (match-define (cartesian [x2 y2]) pt2)
-  (match-define (cartesian [x3 y3]) pt3)
-  (match-define (cartesian [x4 y4]) pt4)
+(define-icp (line-line-intersection
+             "line_line_intersection"
+             _cartesian _cartesian _cartesian _cartesian (out : (_ptr o _cartesian))
+             -> _void
+             -> out))
+;;   (match-define (cartesian [x1 y1]) pt1)
+;;   (match-define (cartesian [x2 y2]) pt2)
+;;   (match-define (cartesian [x3 y3]) pt3)
+;;   (match-define (cartesian [x4 y4]) pt4)
 
-  ;; From Wikipedia:
-  ;;
-  ;; P(x,y)= \bigg(&\frac{(x_1 y_2-y_1 x_2)(x_3-x_4)-(x_1-x_2)(x_3 y_4-y_3 x_4)}{(x_1-x_2)(y_3-y_4)-(y_1-y_2)(x_3-x_4)}, \\
-  ;;        &\frac{(x_1 y_2-y_1 x_2)(y_3-y_4)-(y_1-y_2)(x_3 y_4-y_3 x_4)}{(x_1-x_2)(y_3-y_4)-(y_1-y_2)(x_3-x_4)}\bigg)
-  (define x
-    (/ (- (* (- (* x1 y2) (* y1 x2)) (- x3 x4))
-          (* (- x1 x2) (- (* x3 y4) (* y3 x4))))
-       (- (* (- x1 x2) (- y3 y4)) (* (- y1 y2) (- x3 x4)))))
-  (define y
-    (/ (- (* (- (* x1 y2) (* y1 x2)) (- y3 y4))
-          (* (- y1 y2) (- (* x3 y4) (* y3 x4))))
-       (- (* (- x1 x2) (- y3 y4))
-          (* (- y1 y2) (- x3 x4)))))
-  (make-cartesian x y))
+;;   ;; From Wikipedia:
+;;   ;;
+;;   ;; P(x,y)= \bigg(&\frac{(x_1 y_2-y_1 x_2)(x_3-x_4)-(x_1-x_2)(x_3 y_4-y_3 x_4)}{(x_1-x_2)(y_3-y_4)-(y_1-y_2)(x_3-x_4)}, \\
+;;   ;;        &\frac{(x_1 y_2-y_1 x_2)(y_3-y_4)-(y_1-y_2)(x_3 y_4-y_3 x_4)}{(x_1-x_2)(y_3-y_4)-(y_1-y_2)(x_3-x_4)}\bigg)
+;;   (define x
+;;     (/ (- (* (- (* x1 y2) (* y1 x2)) (- x3 x4))
+;;           (* (- x1 x2) (- (* x3 y4) (* y3 x4))))
+;;        (- (* (- x1 x2) (- y3 y4)) (* (- y1 y2) (- x3 x4)))))
+;;   (define y
+;;     (/ (- (* (- (* x1 y2) (* y1 x2)) (- y3 y4))
+;;           (* (- y1 y2) (- (* x3 y4) (* y3 x4))))
+;;        (- (* (- x1 x2) (- y3 y4))
+;;           (* (- y1 y2) (- x3 x4)))))
+;;   (make-cartesian x y))
 
 
 ;; Polar Pose Pose -> Polar

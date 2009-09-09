@@ -15,9 +15,17 @@ double line_segment_closest_point(cartesian_t pt1, cartesian_t pt2, cartesian_t 
     
     return cartesian_distance(pt1, pt);
   } else {
+    double x1, x2, y1, y2, x, y;
+    x = pt.x;
+    y = pt.y;
+    x1 = pt1.x;
+    y1 = pt1.y;
+    x2 = pt2.x;
+    y2 = pt2.y;
+    
     dist = cartesian_distance(pt2, pt1);
-    u = (pt.x - pt1.x) * (pt2.x - pt1.x) + (pt.y - pt1.y) * (pt2.y - pt1.y);
-    u = u / dist;
+    u = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
+    u = u / (dist * dist);
     
     if (u <= 0) 
     {
@@ -33,7 +41,7 @@ double line_segment_closest_point(cartesian_t pt1, cartesian_t pt2, cartesian_t 
       out->y = pt1.y + (u * (pt2.y - pt1.y));
     }
     
-    return cartesian_distance(&out, pt);
+    return cartesian_distance(*out, pt);
   }
 }
 
@@ -51,14 +59,17 @@ void line_line_intersection(cartesian_t pt1, cartesian_t pt2, cartesian_t pt3, c
   y4 = pt4.y;
 
   // This formula taken from Wikipedia
-  out->x = 
-    ((((x1 * y2) - (y1 * x2)) * (x3 - x4)) - ((x1 - x2) * ((x3 * x4) - (y3 * x4)))) /
-    (((x1 - x2) * (y3 - y4)) - ((y1 - y2) * (x3 - x4)));
-  
+  out->x =
+    (((((x1 * y2) - (y1 * x2)) * (x3 - x4)) -
+      ((x1 - x2) * ((x3 * y4) - (y3 * x4))))
+     /
+     (((x1 - x2) * (y3 - y4)) - ((y1 - y2) * (x3 - x4))));
+
   out->y =
-    ((((x1 * y2) - (y1 * x2)) * (y3 - y4)) -
-     ((y1 - y2) * ((x3 * y4) - (y3 * x4)))) /
-    (((x1 - x2) * (y3 - y4)) - ((y1 - y2) * (x3 - x4)));
+    (((((x1 * y2) - (y1 * x2)) * (y3 - y4)) -
+      ((y1 - y2) * ((x3 * y4) - (y3 * x4))))
+     /
+     (((x1 - x2) * (y3 - y4)) - ((y1 - y2) * (x3 - x4))));
   
   return;
 }

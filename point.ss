@@ -126,13 +126,15 @@
  (rename-out [my-polar? polar?])
  polar-r
  polar-a
-
+ _polar
+ 
  cartesian
  cartesian->vector
  make-cartesian
  (rename-out [my-cartesian? cartesian?])
  cartesian-x
  cartesian-y
+ _cartesian
  
  polar->cartesian
  cartesian->polar
