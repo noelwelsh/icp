@@ -46,7 +46,7 @@
     e))
 
   (test-case
-   "matching-point find no match when all points outside of rotation"
+   "matching-point finds no match when all points outside of rotation"
    (check-false
     (matching-point (make-polar 3 0)
                     (vector (make-polar 4 2) (make-polar 3 1))

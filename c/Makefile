@@ -1,8 +1,13 @@
 OBJS   =  icp_base.o angle.o point.o geometry.o pose.o util.o icp.o
 CFLAGS =  -std=gnu99 -funroll-loops -O3 -fpic
+SYS    =  $(shell uname)
 
 libicp.so: $(OBJS)
+ifeq ($(SYS),Darwin)
+	gcc $(CFLAGS) -dynamiclib -o libicp.dylib $(OBJS)
+else
 	gcc $(CFLAGS) -shared -o libicp.so $(OBJS)
+endif
 
 icp_so: libicp.so
 

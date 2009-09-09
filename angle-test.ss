@@ -22,7 +22,9 @@
    (check-= (angle-normalise -8) (+ -8 2pi 2pi) 0)
    (check-= (angle-normalise (- 2pi)) 0 0)
    (check-= (angle-normalise (* -4 2pi)) 0 0)
-   (check-= (angle-normalise (- (* -2 2pi) 2)) (- 2pi 2) 0))
+   (check-= (angle-normalise (- (* -2 2pi) 2)) (- 2pi 2) 0)
+
+   (check-= (angle-normalise 6.169738940534455) 6.169738940534455 0))
 
   (test-case
    "angle=?"

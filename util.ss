@@ -10,7 +10,7 @@
              (err : (_vector i _double*)) (_int = (vector-length err)) -> _double))
 
 (define-icp (sse2
-             "sse"
+             "sse2"
              (err1 : (_vector i _double*)) (_vector i _double*) (_int = (vector-length err1)) -> _double))
   
 

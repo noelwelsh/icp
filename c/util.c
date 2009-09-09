@@ -6,6 +6,9 @@ double sse1(double err[], int n)
   int i;
   double x;
 
+  squares = 0;
+  sum = 0;
+
   for(i = 0; i < n; i++) 
   {
     x = err[i];
@@ -16,11 +19,17 @@ double sse1(double err[], int n)
   return squares - (sum * sum / n);
 }
 
-double sse(double err1[], double err2[], int n) 
+double sse2(double err1[], double err2[], int n) 
 {
   double sum_xy, sum_x, sum_y, mean_x, mean_y;
   int i;
   double x, y;
+
+  sum_xy = 0;
+  sum_x = 0;
+  sum_y = 0;
+  mean_x = 0;
+  mean_y = 0;
 
   for(i = 0; i < n; i++) 
   {

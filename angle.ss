@@ -10,7 +10,7 @@
 ;; Number -> Number
 ;;
 ;; Normalises an angle (in radians) to [0, 2pi)
-(define-icp (angle-normalise "angle_normalise" _double* -> _double*))
+(define-icp (angle-normalise "angle_normalise" _double* -> _double))
 
 ;; Number Number [Number] -> (U #t #f)
 ;;

@@ -21,16 +21,10 @@
              _polar _polar _double _polar-pointer -> _void))
 
 
-(define (interpolate-point-to-range p1 p2 r)
-  (match-define (polar (r1 a1)) p1)
-  (match-define (polar (r2 a2)) p2)
+(define-icp (interpolate-point-to-range
+             "icp_interpolate_point_to_range"
+             _polar _polar _double _polar-pointer -> _void))
 
-  (define a
-    (angle-normalise
-     (* (/ (- r1 r2))
-        (+ (/ (* r1 r2 (angle-normalise (- a2 a1))) r)
-           (- (* r1 a1) (* r2 a2))))))
-  (make-polar r a))
 
 
 ;; (Vectorof Polar) (Vectorof Polar) Number Number Number Number
@@ -51,23 +45,36 @@
        (polar-normalise (cartesian->polar (cartesian-transform (polar->cartesian pt) xt yt a))))
      new-pts))
   (define matching-pts
-    (matching-points transformed-pts ref-pts rotation
-                     interpolate-point-to-angle
-                     closest-point))
+    (icp-matching-points transformed-pts ref-pts rotation))
   ;;(printf "ICP ~a ~a ~a ~a\n" xt yt a rotation)
   (optimal-transformation transformed-pts matching-pts))
 
+(define-icp (icp-matching-points-internal
+             "icp_matching_points"
+             (new-pts : (_vector i _polar)) (_vector i _polar)
+             (n : _int = (vector-length new-pts))
+             _double*
+             (out : (_vector o _polar n))
+             -> _void
+             -> out))
 
-
-;; These are defined for tests
 (define (icp-matching-points new-pts ref-pts rotation)
-  (matching-points new-pts ref-pts rotation
-                   interpolate-point-to-angle
-                   closest-point))
+  (define matching-pts (icp-matching-points-internal new-pts ref-pts rotation))
+  (vector-map
+   (lambda (pt)
+     (if (and (= (polar-r pt) -1.0) (= (polar-a pt) -1.0))
+         #f
+         pt))
+   matching-pts))
+
 
 (define (icp-matching-point pt pts rotation)
-  (matching-point pt pts rotation
-                  interpolate-point-to-angle closest-point))
+  (define match-pt
+    (matching-point pt pts rotation
+                    interpolate-point-to-angle closest-point))
+  (if (and (= (polar-r match-pt) -1.0) (= (polar-a match-pt) -1.0))
+      #f
+      match-pt))
 
 (provide
  closest-point
