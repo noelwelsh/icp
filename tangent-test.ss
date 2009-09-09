@@ -16,21 +16,24 @@
    "fit-tangent without noise"
    ;; A line at 45 degress
    (check-point
-    (fit-tangent->normal (list->vector
-                          (map (lambda (x) (make-cartesian x (+ x 3)))
-                               '(-4 -2 0 3 5 6))))
+    (polar-normalise
+     (fit-tangent->normal (list->vector
+                           (map (lambda (x) (make-cartesian x (+ x 3)))
+                                '(-4 -2 0 3 5 6)))))
     (make-polar (/ (sqrt 18) 2) (* 3/4 pi))
     e)
    ;; A horizontal line
    (check-point
-    (fit-tangent->normal (vector (make-cartesian -1 -2) (make-cartesian 0 -2)
-                                 (make-cartesian  2 -2) (make-cartesian 3 -2)))
+    (polar-normalise
+     (fit-tangent->normal (vector (make-cartesian -1 -2) (make-cartesian 0 -2)
+                                  (make-cartesian  2 -2) (make-cartesian 3 -2))))
     (make-polar 2 (* 3/2 pi))
     e)
    ;; A vertical line
    (check-point
-    (fit-tangent->normal (vector (make-cartesian -2 -1) (make-cartesian -2 0)
-                                 (make-cartesian -2 2) (make-cartesian -2 3)))
+    (polar-normalise
+     (fit-tangent->normal (vector (make-cartesian -2 -1) (make-cartesian -2 0)
+                                  (make-cartesian -2 2) (make-cartesian -2 3))))
     (make-polar 2 pi)
     e))
 
@@ -40,7 +43,7 @@
                  (fit-tangent (list->vector
                                (map (lambda (x) (make-cartesian x (+ x 3)))
                                     '(-4 -2 0 3 5 6))))))
-     (check-pred zero? err)))
+     (check-= err 0.0 e)))
   
   (test-case
    "fit-tangents discards noisy tangents"

@@ -42,9 +42,10 @@
       (printf "Iteration ~a ~a\n" i j)
       (if (= i j)
           (begin
-            (matrix-set! c i j 0)
+            (matrix-set! c i j 0.0)
             sum)
           (let ([error (scan-match-error ref-pts ref-pose new-pts new-pose)])
+            (printf "~a ~a ~a\n" i j error)
             (matrix-set! c i j error)
             (+ error sum))))))
 
@@ -65,9 +66,10 @@
       (define c (matrix-rows e))
       (printf "~a ~a\n" r c)
       (printf "~a\n" (cache-std-dev cache))
-      (for* ([i (in-range r)]
-             [j (in-range c)])
-            (display (matrix-ref e i j)) (display " ")))
+      (for ([i (in-range r)])
+        (for ([j (in-range c)])
+             (display (matrix-ref e i j)) (display " "))
+        (newline)))
     #:exists 'replace))
 
 (define (read-cache file-name)

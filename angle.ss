@@ -1,22 +1,16 @@
 #lang scheme/base
 
 (require
- scheme/math)
+ scheme/foreign
+ scheme/math
+ "c/base.ss")
 
 (define 2pi (* 2 pi))
 
 ;; Number -> Number
 ;;
 ;; Normalises an angle (in radians) to [0, 2pi)
-(define (angle-normalise a)
-  (cond
-   [(and (<= 0 a) (< a 2pi)) a]
-   [(< a 0)
-    (angle-normalise (- a (* (floor (/ a 2pi)) 2pi)))]
-   [(<= 2pi a)
-    (angle-normalise (- a (* (ceiling (/ a 2pi)) 2pi)))]
-   [else (error 'angle-normalise "impossible condition for angle ~a\n" a)]))
-
+(define-icp (angle-normalise "angle_normalise" _double* -> _double*))
 
 ;; Number Number [Number] -> (U #t #f)
 ;;
@@ -43,8 +37,7 @@
 ;; anticlockwise direction
 ;;
 ;; a1 and a2 should be normalised
-(define (angle<? a1 a2)
-  (< (angle-normalise (- a2 a1)) pi))
+(define-icp (angle<? "angle_less_than" _double* _double* -> _bool))
 
 (provide
  angle-normalise

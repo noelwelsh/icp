@@ -32,7 +32,7 @@
 (define (matching-point p pts rotation
                         interpolate-point-to-angle
                         closest-point)
-  (match-define (struct polar (r a)) p)
+  (match-define (polar (r a)) p)
   (define low (angle-normalise (- a rotation)))
   (define high (angle-normalise (+ a rotation)))
 
@@ -40,8 +40,8 @@
     (for/fold ([found #f] [found-dist -inf.0])
         ([p1 (in-vector pts)]
          [p2 (in-vector pts 1)])
-      (match-define (struct polar (r1 a1)) p1)
-      (match-define (struct polar (r2 a2)) p2)
+      (match-define (polar (r1 a1)) p1)
+      (match-define (polar (r2 a2)) p2)
 
       ;;(printf "low ~a  high ~a  a1 ~a  a2 ~a\n" low high a1 a2)
       (if (or

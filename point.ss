@@ -1,109 +1,93 @@
 #lang scheme/base
 
-(require scheme/math
-         scheme/match
-         (planet schematics/numeric:1/vector)
-         (planet schematics/schemeunit:3)
-         "angle.ss")
+(require
+ scheme/foreign
+ scheme/math
+ scheme/match
+ (planet schematics/numeric:1/vector)
+ (planet schematics/schemeunit:3)
+ "angle.ss"
+ "c/base.ss")
 
-;; struct polar : number number
-(define-struct polar (r a) #:prefab)
-;; struct cartesian : number number
-(define-struct cartesian (x y) #:prefab)
+(define-cstruct _polar
+  ([r _double*]
+   [a _double*]))
 
+(define-cstruct _cartesian
+  ([x _double*]
+   [y _double*]))
 
-(define (polar->cartesian p)
-  (match-define (struct polar (r a)) p)
-  (define x (* r (cos a)))
-  (define y (* r (sin a)))
+;; The default predicates aren't that useful as they don't
+;; return #t, returning a list instead on success
+(define (my-polar? p)
+  (if (polar? p) #t #f))
+(define (my-cartesian? p)
+  (if (cartesian? p) #t #f))
 
-  (make-cartesian x y))
+(define-icp (polar->cartesian
+             "polar_to_cartesian"
+             (p : _polar) (out : (_ptr o _cartesian)) -> _void -> out))
 
-(define (cartesian->polar p)
-  (match-define (struct cartesian (x y)) p)
-  (define r (sqrt (+ (* x x) (* y y))))
-  (define a (if (and (zero? y) (zero? x))
-                0
-                (atan y x)))
+(define-icp (cartesian->polar
+             "cartesian_to_polar"
+             (p : _cartesian) (out : (_ptr o _polar)) -> _void -> out))
 
-  (make-polar r a))
+(define-icp (cartesian+
+             "cartesian_add"
+             _cartesian _cartesian (out : (_ptr o _cartesian)) -> _void -> out))
 
-(define (cartesian+ p1 p2)
-  (match-define (struct cartesian (x1 y1)) p1)
-  (match-define (struct cartesian (x2 y2)) p2)
+(define-icp (cartesian-
+             "cartesian_minus"
+             _cartesian _cartesian (out : (_ptr o _cartesian)) -> _void -> out))
 
-  (make-cartesian (+ x1 x2) (+ y1 y2)))
+(define-icp (cartesian=?
+             "cartesian_equal"
+             _cartesian _cartesian -> _bool))
 
-(define (cartesian- p1 p2)
-  (match-define (struct cartesian (x1 y1)) p1)
-  (match-define (struct cartesian (x2 y2)) p2)
+(define-icp (cartesian-distance
+             "cartesian_distance"
+             _cartesian _cartesian -> _double))
 
-  (make-cartesian (- x1 x2) (- y1 y2)))
-
-(define (cartesian-distance p1 p2)
-  (match-define (struct cartesian (x y)) (cartesian- p1 p2))
-
-  (sqrt (+ (* x x) (* y y))))
-
-(define (cartesian-dot p1 p2)
-  (match-define (struct cartesian (x1 y1)) p1)
-  (match-define (struct cartesian (x2 y2)) p2)
-
-  (+ (* x1 x2) (* y1 y2)))
+(define-icp (cartesian-dot
+             "cartesian_dot"
+             _cartesian _cartesian -> _double))
 
 ;; cartesian-transform : Cartesian Number Number Number -> Cartesian
 ;;
 ;; Transform a point by a translation and a rotation. We
 ;; assume the rotation is about the origin, and is performed
 ;; before the translation
-(define (cartesian-transform p xt yt a)
-  (match-define (struct cartesian (x y)) p)
-
-  ;; Rotation matrix is
-  ;;   cos a  -sin a
-  ;;   sin a   cos a
-  (define cosa (cos a))
-  (define sina (sin a))
-  
-  (make-cartesian (+ (* cosa x) (- (* sina y)) xt)
-                  (+ (* sina x) (* cosa y) yt)))
+(define-icp (cartesian-transform
+             "cartesian_transform"
+             _cartesian _double* _double* _double* (out : (_ptr o _cartesian)) -> _void -> out))
 
 
-(define (polar+ p1 p2)
-  ;; Note that r can also be calculated as
-  ;; r^2 = r1^2 + r2^2 + 2r1r2 cos(a1 - a2)
-  (match-define (struct polar (r1 a1)) p1)
-  (match-define (struct polar (r2 a2)) p2)
+(define-icp (polar+
+             "polar_add"
+             _polar _polar (out : (_ptr o _polar)) -> _void -> out))
 
-  (cartesian->polar (cartesian+ (polar->cartesian p1) (polar->cartesian p2))))
+(define-icp (polar-
+             "polar_minus"
+             _polar _polar (out : (_ptr o _polar)) -> _void -> out))
 
-(define (polar- p1 p2)
-  (match-define (struct polar (r1 a1)) p1)
-  (match-define (struct polar (r2 a2)) p2)
+(define-icp (polar-dot
+            "polar_dot"
+            _polar _polar -> _double))
 
-  (cartesian->polar (cartesian- (polar->cartesian p1) (polar->cartesian p2))))
+(define-icp (polar-rotate
+             "polar_rotate"
+             _polar _double* (out : (_ptr o _polar)) -> _void -> out))
 
-(define (polar-dot p1 p2)
-  (match-define (struct polar (r1 a1)) p1)
-  (match-define (struct polar (r2 a2)) p2)
-
-  (* r1 r2 (cos (- a1 a2))))
-
-(define (polar-rotate p theta)
-  (match-define (struct polar (r a)) p)
-
-  (make-polar r (+ a theta)))
-
-(define (polar-normalise p)
-  (match-define (struct polar (r a)) p)
-  (make-polar r (angle-normalise a)))
+(define-icp (polar-normalise
+             "polar_normalise"
+             _polar (out : (_ptr o _polar)) -> _void -> out))
 
 
 (define-check (check-point p1 p2 e)
-  (check-true (or (and (cartesian? p1)
-                       (cartesian? p2))
-                  (and (polar? p1)
-                       (polar? p2)))
+  (check-true (or (and (my-cartesian? p1)
+                       (my-cartesian? p2))
+                  (and (my-polar? p1)
+                       (my-polar? p2)))
               (format "Points ~a and ~a are of different types" p1 p2))
   (if (cartesian? p1)
       (begin
@@ -121,15 +105,41 @@
                  (format "Points ~a and ~a angles differ by more than ~a"
                          p1 p2 e)))))
 
+
+(define (polar->vector p)
+  (vector (polar-r p) (polar-a p)))
+(define-match-expander polar
+  (syntax-rules ()
+    [(polar (r a))
+     (app polar->vector (vector r a))]))
+(define (cartesian->vector p)
+  (vector (cartesian-x p) (cartesian-y p)))
+(define-match-expander cartesian
+  (syntax-rules ()
+    [(polar (x y))
+     (app cartesian->vector (vector x y))]))
+
 (provide
- (struct-out polar)
- (struct-out cartesian)
+ polar
+ polar->vector
+ make-polar
+ (rename-out [my-polar? polar?])
+ polar-r
+ polar-a
+
+ cartesian
+ cartesian->vector
+ make-cartesian
+ (rename-out [my-cartesian? cartesian?])
+ cartesian-x
+ cartesian-y
  
  polar->cartesian
  cartesian->polar
 
  cartesian+
  cartesian-
+ cartesian=?
  cartesian-distance
  cartesian-dot
  cartesian-transform

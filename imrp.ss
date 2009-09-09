@@ -9,9 +9,9 @@
 
 ;; Polar Polar Polar Number -> (values Polar Number)
 (define (closest-point p p1 p2)
-  (match-define (struct polar (r a)) p)
-  (match-define (struct polar (r1 a1)) p1)
-  (match-define (struct polar (r2 a2)) p2)
+  (match-define (polar (r a)) p)
+  (match-define (polar (r1 a1)) p1)
+  (match-define (polar (r2 a2)) p2)
 
   (define closest-pt
     (cond
@@ -29,8 +29,8 @@
           (cartesian-distance (polar->cartesian p) (polar->cartesian closest-pt))))
 
 (define (interpolate-point-to-angle p1 p2 a)
-  (match-define (struct polar (r1 a1)) p1)
-  (match-define (struct polar (r2 a2)) p2)
+  (match-define (polar (r1 a1)) p1)
+  (match-define (polar (r2 a2)) p2)
 
   (define r
     (/ (* r1 r2 (angle-normalise (- a2 a1)))
@@ -38,8 +38,8 @@
   (make-polar r a))
 
 (define (interpolate-point-to-range p1 p2 r)
-  (match-define (struct polar (r1 a1)) p1)
-  (match-define (struct polar (r2 a2)) p2)
+  (match-define (polar (r1 a1)) p1)
+  (match-define (polar (r2 a2)) p2)
 
   (define a
     (angle-normalise

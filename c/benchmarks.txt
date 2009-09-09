@@ -1,0 +1,44 @@
+Pure Scheme:
+
+(time (for ([pts (in-vector points)]
+         [pose (in-vector poses)]
+         [i (in-naturals)])
+        (define ref-pts (project-points pts pose pose))
+        (define new-pts pts)
+        (define-values (xt yt a) (idc ref-pts new-pts 0 0 0 .2))
+        (printf "IDC ~a: ~a ~a ~a\n" i xt yt a)
+        (check-= xt 0 0.1)
+        (check-= yt 0 0.1)
+        (check-= a  0 0.1)))
+IDC 0: 0 0 0
+IDC 1: 0 0 0
+IDC 2: 0 0 0
+IDC 3: 0 0 0
+IDC 4: 0 0 0
+IDC 5: 0 0 0
+IDC 6: 0 0 0
+IDC 7: 0 0 0
+IDC 8: 0 0 0
+IDC 9: 0 0 0
+IDC 10: 0 0 0
+IDC 11: 0 0 0
+IDC 12: 0 0 0
+IDC 13: 0 0 0
+IDC 14: 0 0 0
+IDC 15: 0 0 0
+IDC 16: 0 0 0
+IDC 17: 0 0 0
+IDC 18: 0 0 0
+IDC 19: 0 0 0
+IDC 20: 0 0 0
+IDC 21: 0 0 0
+IDC 22: 0 0 0
+IDC 23: 0 0 0
+IDC 24: 0 0 0
+IDC 25: 0 0 0
+IDC 26: 0 0 0
+IDC 27: 0 0 0
+IDC 28: 0 0 0
+IDC 29: 0 0 0
+IDC 30: 0 0 0
+cpu time: 9970 real time: 11854 gc time: 502

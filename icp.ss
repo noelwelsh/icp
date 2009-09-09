@@ -25,8 +25,8 @@
 
 
 (define (interpolate-point-to-range p1 p2 r)
-  (match-define (struct polar (r1 a1)) p1)
-  (match-define (struct polar (r2 a2)) p2)
+  (match-define (polar (r1 a1)) p1)
+  (match-define (polar (r2 a2)) p2)
 
   (define a
     (angle-normalise

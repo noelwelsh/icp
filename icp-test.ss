@@ -44,11 +44,12 @@
   (test-case
    "matching-points finds exact matches for duplicated points"
    (define pts
-     #(#s(polar 12.659980129625007 6.169738940534455)
-       #s(polar 12.659984467529965 6.1871918601262275)
-       #s(polar 12.760034866316001 6.204645553498888)
-       #s(polar 15.460035923506128 6.222098952775416)
-       #s(polar 18.010041482523718 6.23955218569482)))
+     (vector
+      (make-polar 12.659980129625007 6.169738940534455)
+      (make-polar 12.659984467529965 6.1871918601262275)
+      (make-polar 12.760034866316001 6.204645553498888)
+      (make-polar 15.460035923506128 6.222098952775416)
+      (make-polar 18.010041482523718 6.23955218569482)))
    (vector-map
     (lambda (pt1 pt2) (check-point pt1 pt2 e))
     (matching-points pts pts e)

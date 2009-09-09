@@ -6,7 +6,15 @@
          "error-cache.ss"
          "geometry.ss"
          "point.ss"
-         "pose.ss")
+         "pose.ss"
+         "austin-laser-points.ss")
+
+(define austin-points
+  (vector-slice points 4))
+
+(define austin-poses
+  (vector-slice poses 4))
+
 
 (define/provide-test-suite error-cache-tests
   (test-case
@@ -41,5 +49,13 @@
         (check = (cache-ref cache 1 1) (cache-ref cache1 1 1))
         (check = (cache-std-dev cache) (cache-std-dev cache1))))
     (delete-file "foo.txt")))
+
+  (test-case
+   "error-cache error is zero when ref and new are the same"
+   (let ([cache (create-cache austin-points austin-poses)])
+     (check-pred zero? (cache-ref cache 0 0))
+     (check-pred zero? (cache-ref cache 1 1))
+     (check-pred zero? (cache-ref cache 2 2))
+     (check-pred zero? (cache-ref cache 3 3))))
    
   )

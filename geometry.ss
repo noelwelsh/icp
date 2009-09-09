@@ -10,12 +10,12 @@
 
 ;; Cartesian Cartesian Cartesian -> (values Cartesian Number)
 (define (line-segment-closest-point pt1 pt2 pt)
-  (if (equal? pt1 pt2)
+  (if (cartesian=? pt1 pt2)
       (values pt1 (cartesian-distance pt1 pt))
       (let ()
-        (match-define (struct cartesian [x1 y1]) pt1)
-        (match-define (struct cartesian [x2 y2]) pt2)
-        (match-define (struct cartesian [x y]) pt)
+        (match-define (cartesian [x1 y1]) pt1)
+        (match-define (cartesian [x2 y2]) pt2)
+        (match-define (cartesian [x y]) pt)
 
         (define u
           (/ (+ (* (- x x1) (- x2 x1))
@@ -33,10 +33,10 @@
 
 ;; Cartesian Cartesian Cartesian Cartesian -> Cartesian
 (define (line-line-intersection pt1 pt2 pt3 pt4)
-  (match-define (struct cartesian [x1 y1]) pt1)
-  (match-define (struct cartesian [x2 y2]) pt2)
-  (match-define (struct cartesian [x3 y3]) pt3)
-  (match-define (struct cartesian [x4 y4]) pt4)
+  (match-define (cartesian [x1 y1]) pt1)
+  (match-define (cartesian [x2 y2]) pt2)
+  (match-define (cartesian [x3 y3]) pt3)
+  (match-define (cartesian [x4 y4]) pt4)
 
   ;; From Wikipedia:
   ;;

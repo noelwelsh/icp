@@ -1,37 +1,46 @@
 #lang scheme/base
 
 (require scheme/math
+         srfi/26/cut
          (planet schematics/schemeunit:3/test)
+         (planet schematics/numeric:1/vector)
          "slsma.ss"
          "point.ss"
          "pose.ss")
 
 (define e 0.00001)
+(define check-point/e (cut check-point <> <> e))
 
 (define/provide-test-suite slsma-tests
   (test-case
    "filter-bounded-obstacle"
-   (check-equal? (filter-bounded-obstacle
-                  (vector (make-polar 10  0) (make-polar 10 .1) (make-polar 10 .2)
-                          (make-polar 10 .1) (make-polar 10  0) (make-polar 10 .1)))
-                 (vector (make-polar  10  0) (make-polar 10 .1) (make-polar 10 .1))))
+   (vector-map
+    check-point/e
+    (filter-bounded-obstacle
+     (vector (make-polar 10  0) (make-polar 10 .1) (make-polar 10 .2)
+             (make-polar 10 .1) (make-polar 10  0) (make-polar 10 .1)))
+    (vector (make-polar  10  0) (make-polar 10 .1) (make-polar 10 .1))))
 
   (test-case
    "filter-opaque removes points obscured by others in same set"
-   (check-equal? (filter-opaque
-                  (vector (make-polar 10 0) (make-polar 5 .5) (make-polar 10 .7)
-                          (make-polar 10 2) (make-polar 5 .5) (make-polar 5 3))
-                  (vector)
-                  1)
-                 (vector (make-polar 5 .5) (make-polar 10 2) (make-polar 5 .5) (make-polar 5 3))))
+   (vector-map
+    check-point/e
+    (filter-opaque
+     (vector (make-polar 10 0) (make-polar 5 .5) (make-polar 10 .7)
+             (make-polar 10 2) (make-polar 5 .5) (make-polar 5 3))
+     (vector)
+     1)
+    (vector (make-polar 5 .5) (make-polar 10 2) (make-polar 5 .5) (make-polar 5 3))))
 
   (test-case
    "filter-opaque removes points obscured by new-pts"
-   (check-equal? (filter-opaque
-                  (vector (make-polar 10 0) (make-polar 5 2) (make-polar 10 3))
-                  (vector (make-polar 5 1.5) (make-polar 5 2.5))
-                  1)
-                 (vector (make-polar 10 0) (make-polar 5 2))))
+   (vector-map
+    check-point/e
+    (filter-opaque
+     (vector (make-polar 10 0) (make-polar 5 2) (make-polar 10 3))
+     (vector (make-polar 5 1.5) (make-polar 5 2.5))
+     1)
+    (vector (make-polar 10 0) (make-polar 5 2))))
 
   (test-case
    "matching-point finds exact match"
@@ -45,8 +54,8 @@
                      0
                      10
                      10))
-    (check-equal? pt (make-polar 4 0))
-    (check-equal? normal (make-polar 4 0)))
+    (check-point pt (make-polar 4 0) e)
+    (check-point normal (make-polar 4 0) e))
 
   (test-case
    "matching-points find expected matches"
@@ -54,8 +63,8 @@
                        (make-polar 4 pi) (make-polar 4 (* pi 3/2))))
    (define-values (matches normals)
      (matching-points pts pts pts pts 0 10 10))
-   (check-equal? matches pts)
-   (check-equal? normals pts))
+   (vector-map check-point/e matches pts)
+   (vector-map check-point/e normals pts))
 
   (test-case
    "optimise-translation finds optimal"
