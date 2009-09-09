@@ -1,27 +1,24 @@
 #lang scheme/base
 
 (require scheme/match
+         scheme/foreign
          (planet schematics/numeric:1/vector)
          "point.ss"
          "geometry.ss"
          "angle.ss"
-         "icp-base.ss")
+         "icp-base.ss"
+         "c/base.ss")
 
 
-;; Polar Polar Polar -> (values Polar Number)
-(define (closest-point p p1 p2)
-  (define-values (closest-pt dist)
-    (line-segment-closest-point (polar->cartesian p1) (polar->cartesian p2)
-                                (polar->cartesian p)))
-  (values (polar-normalise (cartesian->polar closest-pt)) dist))
+;; Polar Polar Polar Polar -> Number
+(define-icp (closest-point
+             "icp_closest_point"
+             _polar _polar _polar _polar-pointer -> _double))
 
-;; Polar Polar Number -> Polar
-(define (interpolate-point-to-angle p1 p2 a)
-  (polar-normalise
-   (cartesian->polar
-    (line-line-intersection
-     (polar->cartesian p1) (polar->cartesian p2)
-     (polar->cartesian (make-polar 1 a)) (make-cartesian 0 0)))))
+;; Polar Polar Number Polar -> Void
+(define-icp (interpolate-point-to-angle
+             "icp_interpolate_point_to_angle"
+             _polar _polar _double _polar-pointer -> _void))
 
 
 (define (interpolate-point-to-range p1 p2 r)

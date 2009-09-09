@@ -4,24 +4,35 @@
 
 (require
  scheme/match
- (planet schematics/numeric:1/vector)
- (planet schematics/numeric:1/for)
+ scheme/foreign
  (planet williams/science:3/statistics)
+ (planet schematics/numeric:1/for)
+ (planet schematics/numeric:1/vector)
  "point.ss"
  "angle.ss"
- "util.ss")
+ "util.ss"
+ "c/base.ss")
+
+(define _interpolate_point_to_angle
+  (_fun _polar _polar _double _polar-pointer -> _void))
+
+(define _closest_point
+  (_fun _polar _polar _polar _polar-pointer -> _double))
 
 ;; (Vectorof Polar) (Vectorof Polar) Number
 ;; (Polar Polar Number -> Polar) (Polar Polar Polar -> (values Polar Number))
 ;;  ->
 ;; (Vectorof (U Polar #f))
-(define (matching-points scan-pts model-pts rotation
-                         interpolate-point-to-angle
-                         closest-point)
-  (for/vector ([i (vector-length scan-pts)]
-               [pt (in-vector scan-pts)])
-              (matching-point pt model-pts rotation
-                              interpolate-point-to-angle closest-point)))
+(define-icp (matching-points
+             "matching_points"
+             (new-pts : (_vector i _polar)) (n : _int = (vector-length new-pts))
+             (ref-pts : (_vector i _polar)) (_int = n)
+             _double*
+             _interpolate_point_to_angle
+             _closest_point
+             (out : (_vector o _polar n))
+             -> _void
+             -> out))
 
 ;; Polar (Vectorof Polar) Number
 ;; (Polar Polar Number -> Polar) (Polar Polar Polar -> (values Polar Number))
@@ -29,43 +40,15 @@
 ;; (U Polar #f)
 ;;
 ;; pts must be sorted by angle from low to high
-(define (matching-point p pts rotation
-                        interpolate-point-to-angle
-                        closest-point)
-  (match-define (polar (r a)) p)
-  (define low (angle-normalise (- a rotation)))
-  (define high (angle-normalise (+ a rotation)))
-
-  (define-values (found _)
-    (for/fold ([found #f] [found-dist -inf.0])
-        ([p1 (in-vector pts)]
-         [p2 (in-vector pts 1)])
-      (match-define (polar (r1 a1)) p1)
-      (match-define (polar (r2 a2)) p2)
-
-      ;;(printf "low ~a  high ~a  a1 ~a  a2 ~a\n" low high a1 a2)
-      (if (or
-           (and (angle<? a1 low) (angle<? a2 low))
-           (and (angle<? high a1) (angle<? high a2)))
-          ;; Current points don't overlap allowable range
-          (values found found-dist)
-          (let*-values (([low-p]
-                         (if (angle<? a1 low)
-                             (interpolate-point-to-angle p1 p2 low)
-                             p1))
-                        ([high-p]
-                         (if (angle<? high a2)
-                             (interpolate-point-to-angle p1 p2 high)
-                             p2))
-                        ([closest closest-dist] (closest-point p low-p high-p)))
-            (cond
-             ;; We haven't previously found a point, so go with the one we just found
-             [(not found) (values closest closest-dist)]
-             [else
-              (if (<= closest-dist found-dist)
-                  (values closest closest-dist)
-                  (values found found-dist))])))))
-  found)
+(define-icp (matching-point
+             "matching_point"
+             _polar (pts : (_vector i _polar)) (_int = (vector-length pts))
+             _double*
+             _interpolate_point_to_angle
+             _closest_point
+             (out : (_ptr o _polar))
+             -> _void
+             -> out))
 
 ;; (Vectorof Polar) (Vectorof (U Polar #f)) -> (values Number Number Number)
 (define (optimal-transformation ref-pts match-pts)
@@ -115,6 +98,9 @@
 
 
 (provide
+ _interpolate_point_to_angle
+ _closest_point
+ 
  matching-points
  matching-point
  optimal-transformation)

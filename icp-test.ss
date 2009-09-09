@@ -9,6 +9,16 @@
 
 (define e 0.001)
 
+(define (closest-point/wrap pt pt1 pt2)
+  (define out (make-polar 0 0))
+  (define dist (closest-point pt pt1 pt2 out))
+  (values out dist))
+
+(define (interpolate-point-to-angle/wrap pt1 pt2 a)
+  (define out (make-polar 0 0))
+  (interpolate-point-to-angle pt1 pt2 a out)
+  out)
+
 (define/provide-test-suite icp-tests
   (test-case
    "matching-point finds match when end point is closest"
@@ -30,7 +40,8 @@
                      (vector (make-polar 3 -.1)  (make-polar 2 0) (make-polar 4 .1)))
                    .2)
     (let-values (([p d]
-                  (closest-point (make-polar 3 0) (make-polar 2 0)  (make-polar 4 .1))))
+                  (closest-point/wrap
+                   (make-polar 3 0) (make-polar 2 0) (make-polar 4 .1))))
       p)
     e))
 

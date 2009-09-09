@@ -126,7 +126,10 @@
  (rename-out [my-polar? polar?])
  polar-r
  polar-a
+ set-polar-r!
+ set-polar-a!
  _polar
+ _polar-pointer
  
  cartesian
  cartesian->vector

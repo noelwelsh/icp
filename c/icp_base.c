@@ -18,7 +18,7 @@ void matching_points(polar_t scan_pts[], int n_scan_pts,
   for(i = 0; i < n_scan_pts; i++) 
   {
     pt = scan_pts[i];
-    matching_point(pt, model_pts, n_model_pts, rotation, interpolate_point_to_angle, closest_point, &(matching_pts[i]));
+    matching_point(pt, model_pts, n_model_pts, rotation, interpolate_point_to_angle, closest_point, matching_pts + i);
   }
   
   return;
@@ -46,6 +46,9 @@ void matching_point(polar_t pt, polar_t pts[], int n_pts, double rotation,
   found = false;
   found_dist = -HUGE_VAL;
 
+  found_pt->r = 0.0;
+  found_pt->a = 0.0;
+  
   for(i = 0; i < (n_pts - 1); i++) 
   {
     pt1 = pts[i];
@@ -62,27 +65,27 @@ void matching_point(polar_t pt, polar_t pts[], int n_pts, double rotation,
       break;
     } else { 
       if (angle_less_than(a1, low)) {
-        interpolate_point_to_angle(&pt1, &pt2, low, &low_pt);
+        interpolate_point_to_angle(pt1, pt2, low, &low_pt);
       } else {
         low_pt = pt1;
       }
 
       if (angle_less_than(high, a2)) {
-        interpolate_point_to_angle(&pt1, &pt2, high, &high_pt);
+        interpolate_point_to_angle(pt1, pt2, high, &high_pt);
       } else {
         high_pt = pt2;
       }
 
-      closest_dist = closest_point(&pt, &low_pt, &high_pt, &closest);
+      closest_dist = closest_point(pt, low_pt, high_pt, &closest);
 
       if (!found) {
-        (*found_pt).r = closest.r;
-        (*found_pt).a = closest.a;
+        found_pt->r = closest.r;
+        found_pt->a = closest.a;
         
         found_dist = closest_dist;
       } else if (closest_dist <= found_dist) {
-        (*found_pt).r = closest.r;
-        (*found_pt).a = closest.a;
+        found_pt->r = closest.r;
+        found_pt->a = closest.a;
 
         found_dist = closest_dist;
       }

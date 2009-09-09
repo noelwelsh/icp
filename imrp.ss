@@ -7,8 +7,8 @@
          "icp-base.ss")
 
 
-;; Polar Polar Polar Number -> (values Polar Number)
-(define (closest-point p p1 p2)
+;; Polar Polar Polar Polar -> Number
+(define (closest-point p p1 p2 out)
   (match-define (polar (r a)) p)
   (match-define (polar (r1 a1)) p1)
   (match-define (polar (r2 a2)) p2)
@@ -25,17 +25,20 @@
           p2)]
      [else
       (interpolate-point-to-range p1 p2 r)]))
-  (values closest-pt
-          (cartesian-distance (polar->cartesian p) (polar->cartesian closest-pt))))
+  (set-polar-r! out (polar-r closest-pt))
+  (set-polar-a! out (polar-a closest-pt))
 
-(define (interpolate-point-to-angle p1 p2 a)
+  (cartesian-distance (polar->cartesian p) (polar->cartesian closest-pt)))
+
+(define (interpolate-point-to-angle p1 p2 a out)
   (match-define (polar (r1 a1)) p1)
   (match-define (polar (r2 a2)) p2)
 
   (define r
     (/ (* r1 r2 (angle-normalise (- a2 a1)))
        (+ (* r1 (angle-normalise (- a a1))) (* r2 (angle-normalise (- a2 a))))))
-  (make-polar r a))
+  (set-polar-r! out r)
+  (set-polar-a! out a))
 
 (define (interpolate-point-to-range p1 p2 r)
   (match-define (polar (r1 a1)) p1)

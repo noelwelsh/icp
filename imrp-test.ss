@@ -10,9 +10,14 @@
 (define e 0.00001)
 
 (define (closest-point/no-dist pt pt1 pt2)
-  (define-values (closest-pt _)
-    (closest-point pt pt1 pt2))
-  closest-pt)
+  (define out (make-polar 0 0))
+  (closest-point pt pt1 pt2 out)
+  out)
+
+(define (interpolate-point-to-angle/wrapper pt1 pt2 a)
+  (define out (make-polar 0 0))
+  (interpolate-point-to-angle pt1 pt2 a out)
+  out)
 
 (define/provide-test-suite imrp-tests
   (test-case
@@ -20,7 +25,7 @@
    (define p1 (make-polar 2 -1))
    (define p2 (make-polar 4 1))
    (check-point
-    (interpolate-point-to-angle p1 p2 0)
+    (interpolate-point-to-angle/wrapper p1 p2 0)
     (make-polar 8/3 0)
     e))
 
