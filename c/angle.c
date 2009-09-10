@@ -1,4 +1,7 @@
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "angle.h"
 
 double two_pi = 2 * M_PI;
@@ -12,7 +15,10 @@ double angle_normalise(double a)
     return angle_normalise(a - (floor(a / two_pi) * two_pi));
   } else if (two_pi <= a){
     return angle_normalise(a - (ceil(a / two_pi) * two_pi));
-  } 
+  } else {
+    printf("angle_normalise given non-numeric %lf angle.\n", a);
+    exit(EXIT_FAILURE);
+  }
 }
 
 bool angle_less_than(double a1, double a2) 

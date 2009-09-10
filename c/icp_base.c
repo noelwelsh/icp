@@ -80,13 +80,15 @@ void matching_point(polar_t pt, polar_t pts[], int n_pts, double rotation,
       if (angle_less_than(a1, low)) {
         interpolate_point_to_angle(pt1, pt2, low, &low_pt);
       } else {
-        low_pt = pt1;
+        low_pt.r = pt1.r;
+        low_pt.a = pt1.a;
       }
 
       if (angle_less_than(high, a2)) {
         interpolate_point_to_angle(pt1, pt2, high, &high_pt);
       } else {
-        high_pt = pt2;
+        high_pt.r = pt2.r;
+        high_pt.a = pt2.a;
       }
 
       closest_dist = closest_point(pt, low_pt, high_pt, &closest);
@@ -146,6 +148,8 @@ void optimal_transformation(polar_t ref_pts[], polar_t matching_pts[], int n_pts
     double r_ys[n_actual_matches];
     double m_xs[n_actual_matches];
     double m_ys[n_actual_matches];
+
+    r_x_mean = r_y_mean = m_x_mean = m_y_mean = 0.0;
     
     for (int i = 0; i < n_pts; i++) {
       polar_t pt = ref_pts[i];

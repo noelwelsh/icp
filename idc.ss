@@ -29,6 +29,12 @@
 (define (idc ref-pts new-pts xt yt a rotation
              #:iterations [iterations 100]
              #:threshold [threshold .001])
+  (when (not (= (vector-length ref-pts) (vector-length new-pts)))
+    (raise-mismatch-error
+     'idc
+     "Reference and new points do not have same length: "
+     (cons (vector-length ref-pts) (vector-length new-pts))))
+  
   (let loop ([i iterations] [xt xt] [yt yt] [a a] [rotation rotation])
     ;;(printf "IDC iteration ~a: ~a ~a ~a ~a\n" i xt yt a rotation)
     (if (zero? i)
