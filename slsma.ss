@@ -243,8 +243,6 @@
 
 
 (provide
- project-point
- project-points
  filter-points
 
  filter-bounded-obstacle

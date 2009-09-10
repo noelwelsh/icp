@@ -34,6 +34,15 @@
     [(data) (sse1 data)]
     [(data1 data2) (sse2 data1 data2)]))
 
+;; Number Number Number Number -> (values Number Number Number Number)
+;;
+;; Calculates the inverse of a 2x2 matrix
+(define (2x2-inverse a b c d)
+  (define divisor (- (* a d) (* b c)))
+  (values (/ d divisor)     (/ (- b) divisor)
+          (/ (- c) divisor) (/ a divisor)))
+
 (provide
  square
- sse)
+ sse
+ 2x2-inverse)

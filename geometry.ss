@@ -107,10 +107,10 @@
   (match-define (pose [n-x n-y n-a]) new-pose)
   (define new-x (polar->cartesian (make-polar 1 n-a)))
   (define new-y (polar->cartesian (polar-rotate (make-polar 1 n-a) (/ pi 2))))
-  (define t (matrix-invert
-             (matrix 2 2
-                     (cartesian-x new-x) (cartesian-x new-y)
-                     (cartesian-y new-x) (cartesian-y new-y))))
+  (define-values (a b c d)
+    (2x2-inverse
+     (cartesian-x new-x) (cartesian-x new-y)
+     (cartesian-y new-x) (cartesian-y new-y)))
 
   (for/vector ([i (vector-length pts)]
                [pt (in-vector pts)])
@@ -118,8 +118,11 @@
                                            (make-cartesian r-x r-y)))
               (define new-pt
                 (let* ([pt (cartesian- world-pt (make-cartesian n-x n-y))]
-                       [v (matrix*v t (vector (cartesian-x pt) (cartesian-y pt)))])
-                  (make-cartesian (vector-ref v 0) (vector-ref v 1))))
+                       [x (cartesian-x pt)]
+                       [y (cartesian-y pt)]
+                       [new-x (+ (* a x) (* b y))]
+                       [new-y (+ (* c x) (* d y))])
+                  (make-cartesian new-x new-y)))
               (define r (cartesian-distance new-pt (make-cartesian 0 0)))
               (define theta (atan (cartesian-y new-pt) (cartesian-x new-pt)))
               (make-polar r
