@@ -14,6 +14,7 @@
              "imrp_closest_point"
              _polar _polar _polar _polar-pointer -> _double))
 
+
 ;; Polar Polar Number Polar -> Void
 (define-icp (interpolate-point-to-angle
              "imrp_interpolate_point_to_angle"
@@ -24,6 +25,15 @@
              "imrp_interpolate_point_to_range"
              _polar _polar _double _polar-pointer -> _void))
 
+
+(define-icp (imrp-matching-points-internal
+             "imrp_matching_points"
+             (new-pts : (_vector i _polar)) (_vector i _polar)
+             (n : _int = (vector-length new-pts))
+             _double*
+             (out : (_vector o _polar n))
+             -> _void
+             -> out))
 
 ;; (Vectorof Polar) (Vectorof Polar) Number Number Number Number
 ;;   ->
@@ -36,25 +46,21 @@
 ;; (translation and rotation) Result is new found
 ;; translation and rotation, which should be applied in
 ;; addition to xt, yt, and a.
-(define (imrp ref-pts new-pts xt yt a rotation)
-  (define transformed-pts
-    (vector-map
-     (lambda (pt)
-       (polar-normalise (cartesian->polar (cartesian-transform (polar->cartesian pt) xt yt a))))
-     new-pts))
-  (define matching-pts
-    (imrp-matching-points-internal transformed-pts ref-pts rotation))
-  (optimal-transformation transformed-pts matching-pts))
+(define-icp (imrp
+             "imrp"
+             (ref-pts new-pts xt yt a rotation)
+             ::
+             (ref-pts : (_vector i _polar))
+             (new-pts : (_vector i _polar))
+             (n : _int = (vector-length ref-pts))
+             (xt : _double*) (yt : _double*) (a : _double*) (rotation : _double*)
+             (xt_out : (_ptr o _double))
+             (yt_out : (_ptr o _double))
+             (a_out : (_ptr o _double))
+             ->
+             _void
+             -> (values xt_out yt_out a_out)))
 
-
-(define-icp (imrp-matching-points-internal
-             "imrp_matching_points"
-             (new-pts : (_vector i _polar)) (_vector i _polar)
-             (n : _int = (vector-length new-pts))
-             _double*
-             (out : (_vector o _polar n))
-             -> _void
-             -> out))
 
 (define (imrp-matching-points new-pts ref-pts rotation)
   (define matching-pts (imrp-matching-points-internal new-pts ref-pts rotation))

@@ -90,3 +90,29 @@ void imrp_matching_points(polar_t new_pts[], polar_t ref_pts[], int n_pts, doubl
   
   return;
 }
+
+
+void imrp(polar_t ref_pts[], polar_t new_pts[], int n_pts,
+         double xt, double yt, double a, double rotation,
+         double *xt_out, double *yt_out, double *a_out) 
+{
+  polar_t transformed_pts[n_pts];
+
+  for (int i = 0; i < n_pts; i++) {
+    polar_t p;
+    cartesian_t c, c1;
+    
+    polar_to_cartesian(new_pts[i], &c);
+    cartesian_transform(c, xt, yt, a, &c1);
+    cartesian_to_polar(c1, &p);
+    
+    transformed_pts[i] = p;
+  }
+  
+  polar_t matching_pts[n_pts];
+  imrp_matching_points(transformed_pts, ref_pts, n_pts, rotation, matching_pts);
+  
+  optimal_transformation(transformed_pts, matching_pts, n_pts, xt_out, yt_out, a_out);
+  
+  return;
+}

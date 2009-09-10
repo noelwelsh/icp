@@ -90,9 +90,9 @@
       (list->vector
        (map (lambda (a) (make-polar 3 (+ a .03)))
             (list 0 .1 .2 .4 .5)))))
-   (check-equal? x1 x2)
-   (check-equal? y1 y2)
-   (check-equal? a1 a2))
+   (check-= x1 x2 e)
+   (check-= y1 y2 e)
+   (check-= a1 a2 e))
 
   (test-case
    "icp iteration moves rotation closer to optimal"
