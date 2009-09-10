@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "imrp.h"
+#include "icp.h"
 #include "point.h"
 #include "math.h"
 
@@ -27,7 +28,10 @@ int main(void)
     }
     
     imrp(new_pts, ref_pts, n_pts, 0.0, 0.0, 0.0, 0.2, &xt, &yt, &a);
-    printf("Iteration %d: %lf %lf %lf\n", i, xt, yt, a);
+    printf("IMRP Iteration %d: %lf %lf %lf\n", i, xt, yt, a);
+
+    icp(new_pts, ref_pts, n_pts, 0.0, 0.0, 0.0, 0.2, &xt, &yt, &a);
+    printf("ICP Iteration %d: %lf %lf %lf\n", i, xt, yt, a);
   }
   
   return EXIT_SUCCESS;
