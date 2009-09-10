@@ -4,7 +4,16 @@
 
 #include "angle.h"
 #include "point.h"
+#include "util.h"
 #include "icp_base.h"
+
+/*********************************************************
+ 
+ By convention a failed match is denoted by a polar point
+ with radius and angle both -1.
+
+ *********************************************************/
+
 
 void matching_points(polar_t scan_pts[], int n_scan_pts,
                      polar_t model_pts[], int n_model_pts,
@@ -107,5 +116,86 @@ void matching_point(polar_t pt, polar_t pts[], int n_pts, double rotation,
   //}
 
   return;
+}
+
+void optimal_transformation(polar_t ref_pts[], polar_t matching_pts[], int n_pts, double* xt, double* yt, double* a) 
+{
+  int n_actual_matches = 0;
+  
+  for (int i = 0; i < n_pts; i++) {
+    polar_t pt = matching_pts[i];
+    if ( (pt.r == -1) && (pt.a == -1) ) {
+      continue;
+    } else {
+      n_actual_matches++;
+    }
+  }
+  
+  if ( (n_actual_matches == 0) || (n_actual_matches == 1) ) {
+    printf("icp_base: Zero or one matching points. Returning no transformation.\n");
+
+    *xt = 0.0;
+    *yt = 0.0;
+    *a  = 0.0;
+    return;
+  } else {
+    int idx = 0;
+    cartesian_t c, cm;
+    double r_x_mean, r_y_mean, m_x_mean, m_y_mean;
+    double r_xs[n_actual_matches];
+    double r_ys[n_actual_matches];
+    double m_xs[n_actual_matches];
+    double m_ys[n_actual_matches];
+    
+    for (int i = 0; i < n_pts; i++) {
+      polar_t pt = ref_pts[i];
+      polar_t match_pt = matching_pts[i];
+
+      if ( (match_pt.r == -1) && (match_pt.a == -1) ) {
+        continue;
+      } else {
+        polar_to_cartesian(pt, &c);
+        polar_to_cartesian(match_pt, &cm);
+        
+        r_xs[idx] = c.x;
+        r_ys[idx] = c.y;
+        m_xs[idx] = cm.x;
+        m_ys[idx] = cm.y;
+        
+        r_x_mean += c.x;
+        r_y_mean += c.y;
+        m_x_mean += cm.x;
+        m_y_mean += cm.y;
+        
+        idx++;
+      }
+    }
+ 
+    r_x_mean /= n_actual_matches;
+    r_y_mean /= n_actual_matches;
+    m_x_mean /= n_actual_matches;
+    m_y_mean /= n_actual_matches;
+      
+    double Sxx = sse2(r_xs, m_xs, n_actual_matches);
+    double Syy = sse2(r_ys, m_ys, n_actual_matches);
+    double Sxy = sse2(r_xs, m_ys, n_actual_matches);
+    double Syx = sse2(r_ys, m_xs, n_actual_matches);
+    
+    if ( (Sxx == 0.0) && (Syy == 0.0) ) {
+      printf("icp_base: Sxx and Sxy both zero. Returning no transformation.\n");
+      
+      *xt = 0.0;
+      *yt = 0.0;
+      *a  = 0.0;
+      return;
+    } else {
+      double angle = atan((Sxy - Syx) / (Sxx + Syy));
+      *xt = (m_x_mean -  (r_x_mean * cos(angle)) - (r_y_mean * sin(angle)));
+      *yt = (m_y_mean - (r_x_mean * sin(angle)) - (r_y_mean * cos(angle)));
+      *a = angle;
+      
+      return;
+    }
+  }
 }
 

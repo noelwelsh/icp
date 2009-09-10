@@ -45,7 +45,7 @@
        (polar-normalise (cartesian->polar (cartesian-transform (polar->cartesian pt) xt yt a))))
      new-pts))
   (define matching-pts
-    (icp-matching-points transformed-pts ref-pts rotation))
+    (icp-matching-points-internal transformed-pts ref-pts rotation))
   ;;(printf "ICP ~a ~a ~a ~a\n" xt yt a rotation)
   (optimal-transformation transformed-pts matching-pts))
 

@@ -14,9 +14,14 @@
   (closest-point pt pt1 pt2 out)
   out)
 
-(define (interpolate-point-to-angle/wrapper pt1 pt2 a)
+(define (interpolate-point-to-angle/wrap pt1 pt2 a)
   (define out (make-polar 0 0))
   (interpolate-point-to-angle pt1 pt2 a out)
+  out)
+
+(define (interpolate-point-to-range/wrap pt1 pt2 r)
+  (define out (make-polar 0 0))
+  (interpolate-point-to-range pt1 pt2 r out)
   out)
 
 (define/provide-test-suite imrp-tests
@@ -25,7 +30,7 @@
    (define p1 (make-polar 2 -1))
    (define p2 (make-polar 4 1))
    (check-point
-    (interpolate-point-to-angle/wrapper p1 p2 0)
+    (interpolate-point-to-angle/wrap p1 p2 0.0)
     (make-polar 8/3 0)
     e))
 
@@ -34,7 +39,7 @@
    (define p1 (make-polar 2 -1))
    (define p2 (make-polar 4 1))
    (check-point
-    (interpolate-point-to-range p1 p2 3)
+    (interpolate-point-to-range/wrap p1 p2 3.0)
     (make-polar 3 1/3)
     e))
 

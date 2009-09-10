@@ -67,7 +67,7 @@
     pts))
   
   (test-case
-   "matching-points handles matches that are #f"
+   "optimal-transformation handles failed matches"
    (define-values (x1 y1 a1)
      ;; Some matches are #f
      (optimal-transformation
@@ -75,10 +75,14 @@
        (map (lambda (a) (make-polar 3 a))
             (list 0 .1 .2 .3 .4 .5)))
       (list->vector
-       (map (lambda (a) (if a (make-polar 3 (+ a .03)) #f))
+       (map (lambda (a)
+              (if a
+                  (make-polar 3 (+ a .03))
+                  (make-polar -1 -1)))
             (list 0 .1 .2 #f .4 .5)))))
    (define-values (x2 y2 a2)
-     ;; #f matches above are simply removed
+     ;; #f matches above are simply removed in the data
+     ;; below
      (optimal-transformation
       (list->vector
        (map (lambda (a) (make-polar 3 a))
