@@ -9,8 +9,7 @@
 void idc(polar_t ref_pts[], polar_t new_pts[], int n_pts,
          double xt, double yt, double a, double rotation,
          int iterations, double threshold,
-         double out[3])
-//         double *xt_out, double *yt_out, double *a_out) 
+         double *xt_out, double *yt_out, double *a_out) 
 {
   for(int i = 0; i < iterations; i++) 
   {
@@ -34,12 +33,9 @@ void idc(polar_t ref_pts[], polar_t new_pts[], int n_pts,
     }
   }
 
-//  *xt_out = xt;
-//  *yt_out = yt;
-//  *a_out = a;
-  out[0] = xt;
-  out[1] = yt;
-  out[2] = a;
+  *xt_out = xt;
+  *yt_out = yt;
+  *a_out = a;
   
   return;
 }

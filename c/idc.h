@@ -6,8 +6,7 @@
 void idc(polar_t[], polar_t[], int,
          double, double, double, double,
          int, double,
-//         double *, double *, double *);
-         double[3]);
+         double *, double *, double *);
 
 
 #endif /* __IDC_H_ */
