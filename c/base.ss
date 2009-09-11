@@ -14,14 +14,14 @@
 ;; (define-icp (scheme-name c-name type ...))
 ;;
 ;; Define a function exported by libicp
-(define-syntax (define-icp stx)
-  (syntax-case* stx () free-identifier=?
+(define-syntax define-icp
+  (syntax-rules () 
     [(define-icp (scheme-name c-name type ...))
-     #'(define scheme-name
-         (get-ffi-obj
-          c-name
-          libicp
-          (_fun type ...)))]))
+     (define scheme-name
+       (get-ffi-obj
+        c-name
+        libicp
+        (_fun type ...)))]))
 
 
 (provide

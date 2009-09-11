@@ -53,7 +53,7 @@
 
 
 (define-icp (icp-internal
-             "icp"
+             "idc"
              (ref-pts : (_vector i _polar)) (new-pts : (_vector i _polar))
              (_int = (vector-length ref-pts))
              _double* _double* _double* _double*
