@@ -123,6 +123,8 @@ void matching_point(polar_t pt, polar_t pts[], int n_pts, double rotation,
 void optimal_transformation(polar_t ref_pts[], polar_t matching_pts[], int n_pts, double* xt, double* yt, double* a) 
 {
   int n_actual_matches = 0;
+
+//  printf("here\n");
   
   for (int i = 0; i < n_pts; i++) {
     polar_t pt = matching_pts[i];
@@ -132,6 +134,7 @@ void optimal_transformation(polar_t ref_pts[], polar_t matching_pts[], int n_pts
       n_actual_matches++;
     }
   }
+//  printf("2\n");
   
   if ( (n_actual_matches == 0) || (n_actual_matches == 1) ) {
     printf("icp_base: Zero or one matching points. Returning no transformation.\n");
@@ -141,6 +144,7 @@ void optimal_transformation(polar_t ref_pts[], polar_t matching_pts[], int n_pts
     *a  = 0.0;
     return;
   } else {
+//  printf("3\n");
     int idx = 0;
     cartesian_t c, cm;
     double r_x_mean, r_y_mean, m_x_mean, m_y_mean;
@@ -174,6 +178,7 @@ void optimal_transformation(polar_t ref_pts[], polar_t matching_pts[], int n_pts
         idx++;
       }
     }
+//  printf("4\n");
  
     r_x_mean /= n_actual_matches;
     r_y_mean /= n_actual_matches;
@@ -193,10 +198,16 @@ void optimal_transformation(polar_t ref_pts[], polar_t matching_pts[], int n_pts
       *a  = 0.0;
       return;
     } else {
+//  printf("5\n");
+
       double angle = atan((Sxy - Syx) / (Sxx + Syy));
+//  printf("5a\n");
       *xt = (m_x_mean -  (r_x_mean * cos(angle)) - (r_y_mean * sin(angle)));
+//  printf("5b\n");
       *yt = (m_y_mean - (r_x_mean * sin(angle)) - (r_y_mean * cos(angle)));
+//  printf("5c\n");
       *a = angle;
+//      printf("6\n");
       
       return;
     }

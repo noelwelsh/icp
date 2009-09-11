@@ -3,8 +3,12 @@
 ;; The Iterative Dual Correspondence algorithm, combining
 ;; ICP and IMRP
 
-(require (only-in "icp.ss" icp)
-         (only-in "imrp.ss" imrp))
+(require
+ scheme/foreign
+ "point.ss"
+ "c/base.ss"
+ (only-in "icp.ss" icp)
+ (only-in "imrp.ss" imrp))
 
 ;; (Vectorof Polar) (Vectorof Polar) Number Number Number Number
 ;; [#:iterations Number] [#:threshold Number]
@@ -34,18 +38,31 @@
      'idc
      "Reference and new points do not have same length: "
      (cons (vector-length ref-pts) (vector-length new-pts))))
-  
-  (let loop ([i iterations] [xt xt] [yt yt] [a a] [rotation rotation])
-    ;;(printf "IDC iteration ~a: ~a ~a ~a ~a\n" i xt yt a rotation)
-    (if (zero? i)
-        (values xt yt a)
-        (let-values (([d-xt d-yt d-a]
-                      (idc-iteration ref-pts new-pts xt yt a rotation)))
-          ;;(printf "IDC d-xt: ~a  d-yt: ~a d-a: ~a\n" d-xt d-yt d-a)
-          (if (and (< (abs d-xt) threshold) (< (abs d-yt) threshold) (< (abs d-a) threshold))
-              (values xt yt a)
-              (loop (sub1 i) (+ xt d-xt) (+ yt d-yt) (+ a d-a) rotation))))))
-  
+
+  (icp-internal ref-pts new-pts xt yt a rotation iterations threshold))
+;;   (let loop ([i iterations] [xt xt] [yt yt] [a a] [rotation rotation])
+;;     ;;(printf "IDC iteration ~a: ~a ~a ~a ~a\n" i xt yt a rotation)
+;;     (if (zero? i)
+;;         (values xt yt a)
+;;         (let-values (([d-xt d-yt d-a]
+;;                       (idc-iteration ref-pts new-pts xt yt a rotation)))
+;;           ;;(printf "IDC d-xt: ~a  d-yt: ~a d-a: ~a\n" d-xt d-yt d-a)
+;;           (if (and (< (abs d-xt) threshold) (< (abs d-yt) threshold) (< (abs d-a) threshold))
+;;               (values xt yt a)
+;;               (loop (sub1 i) (+ xt d-xt) (+ yt d-yt) (+ a d-a) rotation))))))
+
+
+(define-icp (icp-internal
+             "icp"
+             (ref-pts : (_vector i _polar)) (new-pts : (_vector i _polar))
+             (_int = (vector-length ref-pts))
+             _double* _double* _double* _double*
+             _int _double
+             (xt : (_ptr o _double)) (yt : (_ptr o _double)) (a : (_ptr o _double))
+             ->
+             _void
+             ->
+             (values xt yt a)))
 
 (define (idc-iteration ref-pts new-pts xt yt a rotation)
   (define-values (xt1 yt1 r1)

@@ -24,4 +24,5 @@
   util-tests
   angle-tests
   idc-tests
-  error-cache-tests)
+;  error-cache-tests)
+  )
