@@ -17,7 +17,8 @@ double angle_normalise(double a)
     return angle_normalise(a - (ceil(a / two_pi) * two_pi));
   } else {
     printf("angle_normalise given non-numeric %lf angle.\n", a);
-    exit(EXIT_FAILURE);
+    //exit(EXIT_FAILURE);
+    return 0.0;
   }
 }
 
