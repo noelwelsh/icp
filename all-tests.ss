@@ -1,6 +1,7 @@
 #lang scheme/base
 
 (require (planet schematics/schemeunit:3)
+         "icp-base-test.ss"
          "imrp-test.ss"
          "icp-test.ss"
          "idc-test.ss"
@@ -14,6 +15,7 @@
          "angle-test.ss")
 
 (define/provide-test-suite all-tests
+  icp-base-tests
   imrp-tests
   icp-tests
   point-tests

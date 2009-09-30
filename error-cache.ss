@@ -123,7 +123,7 @@
 
 (define (scan-match-error ref-pts ref-pose new-pts new-pose)
   (define-values (xt yt a)
-    (scan-match ref-pts ref-pose new-pts new-pose))
+    (scan-match/idc ref-pts ref-pose new-pts new-pose))
   (define error
     (let ([proj-pts (project-points ref-pts ref-pose new-pose)])
       (normalised-error proj-pts new-pts xt yt a rotation)))
