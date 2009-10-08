@@ -88,7 +88,7 @@
 
 ;; (Vectorof Polar) (Vectorof Polar) Number Number Number Number -> Number
 ;;
-;; Returns the sum of squared error of translated point
+;; Returns the sum of the error of translated point
 ;; matches to reference points using both ICP and IMRP
 ;; normalised by the number of matching points
 ;;
@@ -115,7 +115,7 @@
          [pt3 (in-vector imrp-matches)])
       (define err1 (error pt1 pt2))
       (define err2 (error pt1 pt3))
-      (+ (* err1 err1) (* err2 err2) err)))
+      (+ err1 err2 err)))
   (/ err (* 2 (vector-length transformed-pts))))
 
 
