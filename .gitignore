@@ -4,3 +4,4 @@ compiled
 *.o
 *.so
 .nfs*
+dlib-*

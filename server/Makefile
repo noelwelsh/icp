@@ -1,8 +1,11 @@
-SRC   =  server.cpp ../dlib-17.22/dlib/all/source.cpp
+SRC   =  parser.cpp server.cpp ../dlib-17.22/dlib/all/source.cpp
+SRC  +=  ../c/icp_base.c ../c/angle.c ../c/point.c ../c/geometry.c ../c/pose.c ../c/util.c ../c/icp.c ../c/imrp.c ../c/idc.c
+
 # For normal use
 #CPPFLAGS =  -I"../dlib-17.22/" -DDEBUG -DDLIB_NO_GUI_SUPPORT -O3 -Wall -fPIC -msse2 -march=pentium4 -mfpmath=sse
 # For debugging
 CPPFLAGS =  -I"../dlib-17.22/" -DDEBUG -DDLIB_NO_GUI_SUPPORT -g -O -Wall -fPIC
+CFLAGS =  -std=gnu99 -g -O -Wall -fPIC -msse2 -march=pentium4 -mfpmath=sse
 
 
 SYS = $(shell uname)
@@ -10,15 +13,15 @@ SYS = $(shell uname)
 TMP = $(SRC:.cpp=.o)
 OBJ = $(TMP:.c=.o)
 
-libserver.so: $(OBJ)
+libidcserver.so: $(OBJ)
 ifeq ($(SYS),Darwin)
-	g++ $(CPPFLAGS) -dynamiclib -lm -o libserver.dylib $(OBJS)
+	g++ $(CPPFLAGS) -dynamiclib -lm -o libidcserver.dylib $(OBJS)
 else
-	g++ -shared -Wl,-soname,libserver.so.1 -lnsl -lpthread -lm -o libserver.so $(OBJ)
+	g++ -shared -Wl,-soname,libidcserver.so.1 -lnsl -lpthread -lm -o libidcserver.so $(OBJ)
 endif
 
 clean:
 	rm $(OBJ)
 
-default: libserver.so
+default: libidcserver.so
 

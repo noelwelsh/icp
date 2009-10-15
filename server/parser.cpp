@@ -4,7 +4,9 @@
 #include <dlib/string.h>
 #include <dlib/byte_orderer.h>
 
+extern "C" {
 #include "../c/point.h"
+}
 
 using namespace std;
 using namespace dlib;
@@ -42,11 +44,12 @@ class unexpected_input : public exception
   
 bool read_prelude(iostream& stream) 
 {
+  cout << "read_prelude\n";
+  
   string buff;
   
   getline(stream, buff);
   if (buff.compare("OH HAI") == 0) {
-      cout << "OH HAI TO YOU!\n";
       return true;
   } else {
     throw unexpected_input(buff);
@@ -55,6 +58,8 @@ bool read_prelude(iostream& stream)
 
 bool read_postlude(iostream& stream) 
 {
+  cout << "read_postlude\n";
+
   string buff;
   
   getline(stream, buff);
@@ -68,6 +73,8 @@ bool read_postlude(iostream& stream)
 
 bool read_continuation(iostream& stream) 
 {
+  cout << "read_continuation\n";
+
   string buff;
   
   getline(stream, buff);
@@ -84,6 +91,8 @@ bool read_continuation(iostream& stream)
 
 int read_n(iostream& stream) 
 {
+  cout << "read_n\n";
+  
   string buff;
   
   getline(stream, buff);
@@ -106,7 +115,7 @@ double read_double(iostream& stream)
   if(stream.fail()) {
     throw unexpected_input("Failed reading double.");
   } else {
-    orderer.network_to_host<double>(buff);
+    orderer.little_to_host<double>(buff);
     return buff;
   }
 }
