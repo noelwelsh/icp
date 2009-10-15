@@ -7,6 +7,7 @@
 
 extern "C" {
 #include "../c/idc.h"
+#include "../c/error.h"
 }
 
 #include "server.h"
@@ -16,14 +17,12 @@ using namespace std;
 using namespace dlib;
 
 
-void write_response(iostream& stream, double xt, double yt, double a) 
+void write_response(iostream& stream, double err) 
 {
   stream << "OH HAI\n";
 
-  stream.write((char*)&xt, sizeof(double));
-  stream.write((char*)&yt, sizeof(double));
-  stream.write((char*)&a, sizeof(double));
-    
+  stream.write((char*)&err, sizeof(double));
+
   stream << "KTHX\n";
 }
 
@@ -57,14 +56,16 @@ class scan_match_server : public server::kernel_1a_c
         
         read_postlude(stream);
         
-        double xt_out, yt_out, a_out;
+        double xt_out, yt_out, a_out, err;
         
         idc(ref_pts, new_pts, n,
             xt, yt, a, r,
             100, 0.001,
             &xt_out, &yt_out, &a_out);
         
-        write_response(stream, xt_out, yt_out, a_out);
+        err = normalised_error(ref_pts, new_pts, n, xt_out, yt_out, a_out, r);
+        
+        write_response(stream, err);
       } while(read_continuation(stream));
     } catch (exception& e) {
       cout << "on_connect: Caught exception \n" << e.what() << "\n while processing connection. Closing connection.\n";

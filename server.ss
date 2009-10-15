@@ -19,7 +19,7 @@
    libidcserver
    (_fun -> _void)))
 
-(define (idc ref-pts new-pts xt yt a rotation)
+(define (scan-match-error ref-pts new-pts xt yt a rotation)
   (define (read-double in)
     (floating-point-bytes->real (read-bytes 8 in) #f))
   (define (display-double n out)
@@ -51,15 +51,13 @@
   (display "KTHX\n" out)(display "over and out\n")
 
   (read-line in)
-  (let* ([xt (read-double in)]
-         [yt (read-double in)]
-         [a  (read-double in)])
+  (let* ([err (read-double in)])
     (read-line in)
     (display "KTHXBAI\n" out)
     (read-line in)
     (close-output-port out)
     (close-input-port in)
-    (values xt yt a)))
+    err))
   
 
 (define (test)
@@ -73,4 +71,4 @@
 (provide
  stop
  test
- idc)
+ scan-match-error)

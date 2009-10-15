@@ -1,5 +1,5 @@
 SRC   =  parser.cpp server.cpp ../dlib-17.22/dlib/all/source.cpp
-SRC  +=  ../c/icp_base.c ../c/angle.c ../c/point.c ../c/geometry.c ../c/pose.c ../c/util.c ../c/icp.c ../c/imrp.c ../c/idc.c
+SRC  +=  ../c/icp_base.c ../c/angle.c ../c/point.c ../c/geometry.c ../c/pose.c ../c/util.c ../c/icp.c ../c/imrp.c ../c/idc.c ../c/error.c
 
 # For normal use
 #CPPFLAGS =  -I"../dlib-17.22/" -DDEBUG -DDLIB_NO_GUI_SUPPORT -O3 -Wall -fPIC -msse2 -march=pentium4 -mfpmath=sse

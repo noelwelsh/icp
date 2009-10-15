@@ -1,4 +1,4 @@
-OBJS   =  icp_base.o angle.o point.o geometry.o pose.o util.o icp.o imrp.o idc.o
+OBJS   =  icp_base.o angle.o point.o geometry.o pose.o util.o icp.o imrp.o idc.o error.o
 # For debugging
 CFLAGS =  -std=gnu99 -O -Wall -fPIC -msse2 -march=pentium4 -mfpmath=sse
 #CFLAGS  =  -std=gnu99 -O -Wall -fPIC -lm
