@@ -5,7 +5,10 @@
  scheme/runtime-path
  scheme/tcp
 
- "point.ss")
+ "point.ss"
+ "pose.ss"
+ "geometry.ss"
+ (only-in "scan-match.ss" rotation))
 
 (unsafe!)
 
@@ -19,7 +22,7 @@
    libidcserver
    (_fun -> _void)))
 
-(define (scan-match-error ref-pts new-pts xt yt a rotation)
+(define (scan-match-error ref-pts ref-pose new-pts new-pose)
   (define (read-double in)
     (floating-point-bytes->real (read-bytes 8 in) #f))
   (define (display-double n out)
@@ -30,23 +33,25 @@
   (define (display-points pts out)
     (for ([pt (in-vector pts)])
          (display-polar pt out)))
+
+  (define proj-pts (project-points ref-pts ref-pose new-pose))
   (define-values (in out) (tcp-connect "localhost" 3478))
   
-  (when (not (= (vector-length ref-pts) (vector-length new-pts)))
+  (when (not (= (vector-length proj-pts) (vector-length new-pts)))
     (raise-mismatch-error
      'idc
      "Reference and new points do not have same length: "
-     (cons (vector-length ref-pts) (vector-length new-pts))))
+     (cons (vector-length proj-pts) (vector-length new-pts))))
 
   (file-stream-buffer-mode out 'line)
   (display "OH HAI\n" out)(display "saying hai\n")
   (display "NIZ\n" out)(display "saying niz\n")
-  (display (vector-length ref-pts) out)(display "\n" out)
-  (display-points ref-pts out)(display "sending points\n")
+  (display (vector-length proj-pts) out)(display "\n" out)
+  (display-points proj-pts out)(display "sending points\n")
   (display-points new-pts out)
-  (display-double xt out)
-  (display-double yt out)
-  (display-double a out)
+  (display-double 0.0 out)
+  (display-double 0.0 out)
+  (display-double 0.0 out)
   (display-double rotation out)
   (display "KTHX\n" out)(display "over and out\n")
 
