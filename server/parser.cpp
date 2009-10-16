@@ -44,7 +44,7 @@ class unexpected_input : public exception
   
 bool read_prelude(iostream& stream) 
 {
-  cout << "read_prelude\n";
+  //cout << "read_prelude\n";
   
   string buff;
   
@@ -58,13 +58,12 @@ bool read_prelude(iostream& stream)
 
 bool read_postlude(iostream& stream) 
 {
-  cout << "read_postlude\n";
+  //cout << "read_postlude\n";
 
   string buff;
   
   getline(stream, buff);
   if (buff.compare("KTHX") == 0) {
-      cout << "KTHX\n";
       return true;
   } else {
     throw unexpected_input(buff);
@@ -73,16 +72,14 @@ bool read_postlude(iostream& stream)
 
 bool read_continuation(iostream& stream) 
 {
-  cout << "read_continuation\n";
+  //cout << "read_continuation\n";
 
   string buff;
   
   getline(stream, buff);
   if (buff.compare("MOAR") == 0) {
-    cout << "MOAR!\n";
     return true;
   } else if (buff.compare("KTHXBAI") == 0) {
-    cout << "BAI!\n";
     return false;
   } else {
     throw unexpected_input(buff);
@@ -97,10 +94,9 @@ int read_n(iostream& stream)
   
   getline(stream, buff);
   if (buff.compare("NIZ") == 0) {
-      cout << "NIZ\n";
-      string n;
-      getline(stream, n);
-      return string_cast<int>(n);
+    string n;
+    getline(stream, n);
+    return string_cast<int>(n);
   } else {
     throw unexpected_input(buff);
   }

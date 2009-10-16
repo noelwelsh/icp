@@ -31,7 +31,7 @@ class scan_match_server : public server::kernel_1a_c
 {
   void on_connect(connection& conn) 
   {
-    cout << "New connection\n";
+    //cout << "New connection\n";
     
     sockstreambuf::kernel_2a buf(&conn);
     iostream stream(&buf);
