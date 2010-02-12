@@ -46,7 +46,7 @@
   (file-stream-buffer-mode out 'line)
   (display "OH HAI\n" out)
   (display "NIZ\n" out)
-  (display (vector-length proj-pts) out)
+  (display (vector-length proj-pts) out)(newline out)
   (display-points proj-pts out)
   (display-points new-pts out)
   (display-double 0.0 out)

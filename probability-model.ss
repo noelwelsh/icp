@@ -44,7 +44,6 @@
       (values
        (+ sum (cache-ref cache idx i))
        (add1 n))))
-
   (if (zero? n)
       (gaussian-pdf (cache-std-dev cache) 0 (cache-std-dev cache)) 
       (gaussian-pdf (/ sum n) 0 (cache-std-dev cache))))
