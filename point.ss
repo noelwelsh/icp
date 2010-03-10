@@ -106,22 +106,22 @@
                          p1 p2 e)))))
 
 
-(define (polar->vector p)
-  (vector (polar-r p) (polar-a p)))
-(define-match-expander polar
-  (syntax-rules ()
-    [(polar (r a))
-     (app polar->vector (vector r a))]))
-(define (cartesian->vector p)
-  (vector (cartesian-x p) (cartesian-y p)))
-(define-match-expander cartesian
-  (syntax-rules ()
-    [(polar (x y))
-     (app cartesian->vector (vector x y))]))
+;(define (polar->vector p)
+;  (vector (polar-r p) (polar-a p)))
+;(define-match-expander polar
+;  (syntax-rules ()
+;    [(polar (r a))
+;     (app polar->vector (vector r a))]))
+;(define (cartesian->vector p)
+;  (vector (cartesian-x p) (cartesian-y p)))
+;(define-match-expander cartesian
+;  (syntax-rules ()
+;    [(polar (x y))
+;     (app cartesian->vector (vector x y))]))
 
 (provide
  polar
- polar->vector
+ ;polar->vector
  make-polar
  (rename-out [my-polar? polar?])
  polar-r
@@ -132,7 +132,7 @@
  _polar-pointer
  
  cartesian
- cartesian->vector
+ ;cartesian->vector
  make-cartesian
  (rename-out [my-cartesian? cartesian?])
  cartesian-x

@@ -25,21 +25,21 @@
      (cartesian->polar (cartesian+ (polar->cartesian (polar-rotate pt a)) p)))
    points))
 
-(define (pose->vector p)
-  (vector (pose-x p) (pose-y p) (pose-a p)))
+;(define (pose->vector p)
+;  (vector (pose-x p) (pose-y p) (pose-a p)))
 
-(define-match-expander pose
-  (syntax-rules ()
-    [(pose (x y a))
-     (app pose->vector (vector x y a))]))
+;(define-match-expander pose
+;  (syntax-rules ()
+;    [(pose (x y a))
+;     (app pose->vector (vector x y a))]))
 
 (provide
- pose
- make-pose
- pose?
- pose-x
- pose-y
- pose-a
- pose->vector
+ (struct-out pose)
+ ;make-pose
+ ;pose?
+ ;pose-x
+ ;pose-y
+ ;pose-a
+ ;pose->vector
  
  pose-transform-points)

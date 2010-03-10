@@ -70,7 +70,7 @@
 ;; Finds the closest matching point and normal, or #f if no
 ;; points matches
 (define (matching-point pt normal pts normals rotation alpha Hd)
-  (match-define (polar (r a)) pt)
+  (match-define (struct polar (r a)) pt)
   (define (interpolate a b percentage)
     (+ (* (- a b) percentage) b))
   (define angle (+ a rotation))
@@ -81,8 +81,8 @@
        [p2 (in-vector pts 1)]
        [n2 (in-vector normals 1)]
        #:when (and n1 n2))
-    (match-define (polar (r1 a1)) p1)
-    (match-define (polar (r2 a2)) p2)
+    (match-define (struct polar (r1 a1)) p1)
+    (match-define (struct polar (r2 a2)) p2)
 
     (if (or
          (and (< a1 angle) (< a2 angle))
